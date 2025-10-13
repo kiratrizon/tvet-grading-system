@@ -1,0 +1,80 @@
+<?php
+session_start();
+require '../config/conn.php';
+require '../vendor_excel/autoload.php';
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+if (!isset($_SESSION['teacher_id'])) {
+    header("Location: ../index.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
+    $subject_code = $_POST['subject_code'];
+    $allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel'];
+
+    if (!in_array($_FILES['file']['type'], $allowedTypes)) {
+        $_SESSION['error'] = "Invalid file type. Please upload an Excel file.";
+        header("Location: mysubjects.php?subject=" . urlencode($subject_code));
+        exit();
+    }
+
+    $file = $_FILES['file']['tmp_name'];
+
+    try {
+        $spreadsheet = IOFactory::load($file);
+        $sheet = $spreadsheet->getActiveSheet();
+        $data = $sheet->toArray();
+
+        // Expected Headers
+        $expectedHeaders = ['name', 'course', 'course_code', 'descriptive_title', 'year_level', 'semester', 'school_year', 'final_rating', 'remarks'];
+
+        if ($data[0] !== $expectedHeaders) {
+            $_SESSION['error'] = "Invalid file format. Please use the correct template. format must be like this <br>" . 'name, course, course_code, descriptive_title, year_level, semester, school_year, final_rating, remarks';
+            header("Location: mysubjects.php?subject=" . urlencode($subject_code));
+            exit();
+        }
+
+        // Remove header row
+        array_shift($data);
+
+        $importedCount = 0;
+        $skippedCount = 0;
+
+        foreach ($data as $row) {
+            list($name, $course, $course_code, $descriptive_title, $year_level, $semester, $school_year, $final_rating, $remarks) = $row;
+
+            if ($course_code !== $subject_code) {
+                continue;
+            }
+
+            // Check kung naka-enroll na ang student sa subject
+            $stmt = $conn->prepare("SELECT id FROM student_grades WHERE name = ? AND course_code = ?");
+            $stmt->bind_param("ss", $name, $course_code);
+            $stmt->execute();
+            $stmt->store_result();
+
+            if ($stmt->num_rows === 0) {
+                // Insert student
+                $insert = $conn->prepare("INSERT INTO student_grades (name, course, course_code, descriptive_title, year_level, semester, school_year, final_rating, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                $insert->bind_param("sssssssss", $name, $course, $course_code, $descriptive_title, $year_level, $semester, $school_year, $final_rating, $remarks);
+                $insert->execute();
+                $insert->close();
+                $importedCount++;
+            } else {
+                $skippedCount++;
+            }
+
+            $stmt->close();
+        }
+
+        $_SESSION['success'] = "Students imported successfully! Imported: <strong>$importedCount</strong>, Skipped (already enrolled): <strong>$skippedCount</strong>";
+        header("Location: mysubjects.php?subject=" . urlencode($subject_code));
+        exit();
+    } catch (Exception $e) {
+        $_SESSION['error'] = "An error occurred while processing the file. Please try again.";
+        header("Location: mysubjects.php?subject=" . urlencode($subject_code));
+        exit();
+    }
+}
