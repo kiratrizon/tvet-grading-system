@@ -30,7 +30,7 @@ class Env
 
     public static function get($key, $default = null)
     {
-        return self::$vars[$key] ?? getenv($key) ?? $default;
+        return self::$vars[$key] ?? $default;
     }
 }
 
