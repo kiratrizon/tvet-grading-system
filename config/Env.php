@@ -1,13 +1,15 @@
 <?php
 
+include "../main.php";
 class Env
 {
     private static $vars = [];
 
-    public static function load($path = __DIR__ . '/../.env')
+    public static function load()
     {
+        $path = base_path('.env');
         if (!file_exists($path)) {
-            return ;
+            return;
         }
 
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
