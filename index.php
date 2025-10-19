@@ -27,75 +27,66 @@ function set_user_inactive()
     $_SESSION["active"] = false;
 }
 
-if ($_POST) {
-    $usermail = $_POST['user'];
-    $userpassword = $_POST['pass'];
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $usermail = trim($_POST['user']);
+    $userpassword = trim($_POST['pass']);
 
+    // Check web_users table first
+    $getemail = $conn->query("SELECT * FROM web_users WHERE email = '$usermail'");
 
-    $getemail = $conn->query("SELECT * FROM web_users WHERE email ='$usermail'");
-
-    if ($getemail->num_rows == 1) {
+    if ($getemail && $getemail->num_rows == 1) {
         $usertype = $getemail->fetch_assoc()['usertype'];
 
         if ($usertype == 'a') {
-            $validate = $conn->query("SELECT * FROM admin WHERE a_user_name = '$usermail' AND a_password = '$userpassword'");
-
-            if ($validate->num_rows == 1) {
+            // Admin
+            $validate = $conn->query("SELECT * FROM admin WHERE a_user_name = '$usermail'");
+            if ($validate && $validate->num_rows == 1) {
                 $row = $validate->fetch_assoc();
-                $teacher_id = $row['a_id'];
-                $teacher_name = $row['a_name'];
-                $_SESSION['teacher_id'] = $teacher_id;
-
-
-                $_SESSION['user'] = $usermail;
-                $_SESSION['usertype'] = 'a';
-                $_SESSION['teacher_name'] = $teacher_name;
-                header('location: admin/index.php');
-                exit;
+                if (password_verify($userpassword, $row['a_password']) || $userpassword === $row['a_password']) {
+                    $_SESSION['teacher_id'] = $row['a_id'];
+                    $_SESSION['teacher_name'] = $row['a_name'];
+                    $_SESSION['user'] = $usermail;
+                    $_SESSION['usertype'] = 'a';
+                    header('location: admin/index.php');
+                    exit;
+                }
             }
-        } else if ($usertype == 't') {
-            $validate = $conn->query("SELECT * FROM teachers WHERE t_user_name = '$usermail' AND t_password = '$userpassword'");
-
-            if ($validate->num_rows == 1) {
+        } elseif ($usertype == 't') {
+            // Teacher
+            $validate = $conn->query("SELECT * FROM teachers WHERE t_user_name = '$usermail'");
+            if ($validate && $validate->num_rows == 1) {
                 $row = $validate->fetch_assoc();
-                $teacher_id = $row['t_id'];
-                $teacher_name = $row['t_name'];
-
-                $_SESSION['teacher_id'] = $teacher_id;
-                $_SESSION['teacher_name'] = $teacher_name;
-                $_SESSION['user'] = $usermail;
-                $_SESSION['usertype'] = 't';
-                $_SESSION["logged_in"] = true;
-
-                set_user_active();
-                $conn->query("UPDATE `teachers` SET `status`=1 WHERE t_user_name = '$usermail'");
-
-                header('location: teacher/index.php');
-                exit;
+                if (password_verify($userpassword, $row['t_password']) || $userpassword === $row['t_password']) {
+                    $_SESSION['teacher_id'] = $row['t_id'];
+                    $_SESSION['teacher_name'] = $row['t_name'];
+                    $_SESSION['user'] = $usermail;
+                    $_SESSION['usertype'] = 't';
+                    $_SESSION["logged_in"] = true;
+                    $conn->query("UPDATE teachers SET status = 1 WHERE t_user_name = '$usermail'");
+                    header('location: teacher/index.php');
+                    exit;
+                }
             }
         }
     }
 
-
-
+    // Student login fallback
     $getStudent = $conn->query("SELECT * FROM student_users WHERE email = '$usermail'");
-
-    if ($getStudent->num_rows == 1) {
+    if ($getStudent && $getStudent->num_rows == 1) {
         $student = $getStudent->fetch_assoc();
-        if (password_verify($userpassword, $student['password'])) {
+        if (password_verify($userpassword, $student['password']) || $userpassword === $student['password']) {
             $_SESSION['user'] = $usermail;
             $_SESSION['usertype'] = 's';
             $_SESSION['student_id'] = $student['id'];
             $_SESSION['student_name'] = $student['name'];
-
             header('location: student/index.php');
             exit;
         }
     }
 
+    // Invalid credentials
     $error = 1;
 }
-
 ?>
 
 <!DOCTYPE html>

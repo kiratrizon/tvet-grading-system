@@ -7,7 +7,7 @@ class Env
     public static function load($path = __DIR__ . '/../.env')
     {
         if (!file_exists($path)) {
-            throw new Exception("Env file not found at: " . $path);
+            return ;
         }
 
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
