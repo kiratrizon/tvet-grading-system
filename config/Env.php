@@ -1,6 +1,6 @@
 <?php
 
-include "../main.php";
+require_once 'main.php';
 class Env
 {
     private static $vars = [];
