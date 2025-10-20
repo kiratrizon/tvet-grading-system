@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 16, 2025 at 02:11 AM
+-- Generation Time: Oct 17, 2025 at 02:04 PM
 -- Server version: 10.4.32-MariaDB
--- PHP Version: 8.0.30
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -100,7 +100,7 @@ INSERT INTO `student_grades` (`id`, `student_id`, `name`, `course`, `year_level`
 (191, 35, 'Marceliana Luna', '7', 'First Year', 'First Semester', '2024-2025', 'GE 1', 'Understanding Self', 1.8, 'Passed', 2, 3, 'DBOT 2B'),
 (192, 36, 'Amancio del Pilar', '1', 'First Year', 'First Semester', '2024-2025', 'CC 101', 'Introduction to Computing with Keyboard', 5.0, 'Failed', 4, 24, 'DIT 2B'),
 (193, 37, 'Luzviminda Aguinaldo', '1', 'First Year', 'First Semester', '2024-2025', 'CC 101', 'Introduction to Computing with Keyboard', 2.5, 'Passed', 4, 24, 'DIT 2B'),
-(194, 38, 'Crisanto Silang', '1', 'First Year', 'First Semester', '2024-2025', 'CC 101', 'Introduction to Computing with Keyboard', 1.5, 'Passed', 4, 24, 'DIT 2B'),
+(194, 38, 'Crisanto Silang', '1', 'First Year', 'First Semester', '2024-2025', 'CC 101', 'Introduction to Computing with Keyboard', 3.0, 'Passed', 4, 24, 'DIT 2B'),
 (195, 39, 'Severina Gomburza', '1', 'First Year', 'First Semester', '2024-2025', 'CC 101', 'Introduction to Computing with Keyboard', 2.5, 'Passed', 4, 24, 'DIT 2B'),
 (196, 40, 'Damiana Malvar', '1', 'First Year', 'First Semester', '2024-2025', 'CC 101', 'Introduction to Computing with Keyboard', 1.8, 'Passed', 4, 24, 'DIT 2B');
 
@@ -141,7 +141,7 @@ CREATE TABLE `student_users` (
 --
 
 INSERT INTO `student_users` (`id`, `name`, `course`, `email`, `password`, `s_image`) VALUES
-(30, 'Ana Garcia', '7', 'anagarcia@school.edu', '$2y$10$oPMlojJXq9n6UuYmrYjVx.ApQ9LyYfDWT0elmR5znnZhwjYua7FtO', ''),
+(30, 'Ana Garcia', '7', 'anagarcia@school.edu', 'pass123', ''),
 (31, 'Isabelino Mabini', '7', 'isabelinomabini@school.edu', '$2y$10$WuJjgjFTyuy0vDnQ4cceYOo.0mePDr954YYcZLlUA8y9BlHMiVNoa', ''),
 (32, 'Trinidad Bonifacio', '7', 'trinidadbonifacio@school.edu', '$2y$10$l03vZAN9i9Sukj0KGUWQJ.ir9d8uzs1Dn.y/Nm3qllZ2yLzml8dna', ''),
 (33, 'Segundino Jacinto', '7', 'segundinojacinto@school.edu', '$2y$10$ASMi5UYSlPrJ38B95hT9v.4u7jFXWIg8ROu5PpYto/zEHJR7fAPp2', ''),
@@ -346,7 +346,9 @@ CREATE TABLE `teachers` (
 INSERT INTO `teachers` (`t_id`, `t_name`, `t_user_name`, `t_password`, `t_gender`, `status`, `t_image`) VALUES
 (2, 'Angel Seclon', 'angel@gmail.com', 'angel231', 'female', 0, 'img_67c1f2ad0b85e3.30140365.jpg'),
 (4, 'Bing Bong Abarca', 'bong@gmail.com', 'bong123', 'male', 0, 'img_67c424352b44e9.83923320.jpg'),
-(7, 'Genda Necio', 'genda@gmail.com', 'genda123', 'female', 0, 'img_67c531dc4c17f3.71495902.jpg');
+(7, 'Genda Necio', 'genda@gmail.com', 'genda123', 'female', 0, 'img_67c531dc4c17f3.71495902.jpg'),
+(9, 'Angel Abellanosa', 'rjbrion', '2213', 'male', 1, ''),
+(10, 'Joel Miller Go', 'joel123', '2213', 'male', 0, '');
 
 -- --------------------------------------------------------
 
@@ -377,7 +379,9 @@ INSERT INTO `teacher_subjects` (`id`, `teacher_id`, `subject_id`, `course`, `sec
 (35, 2, 3, '7', 'DBOT 2B', 'First Year', 'First Semester', '2024-2025', '2025-03-13 11:43 PM', 'Thursday', '13:30:00', '14:30:00'),
 (37, 4, 24, '1', 'DIT 2B', 'First Year', 'First Semester', '2024-2025', '2025-03-13 11:50 PM', 'Monday', '13:30:00', '14:30:00'),
 (41, 7, 5, '7', 'DBOT 2D', 'First Year', 'First Semester', '2024-2025', '2025-03-14 12:41 AM', 'Thursday', '13:30:00', '14:30:00'),
-(42, 2, 3, '7', 'DBOT 2D', 'First Year', 'First Semester', '2024-2025', '2025-03-14 02:59 AM', 'Tuesday', '13:30:00', '14:30:00');
+(42, 2, 3, '7', 'DBOT 2D', 'First Year', 'First Semester', '2024-2025', '2025-03-14 02:59 AM', 'Tuesday', '13:30:00', '14:30:00'),
+(47, 9, 3, '7', '', 'First Year', 'First Semester', '2024-2025', '2025-10-17 08:42 AM', 'Monday', '10:41:00', '12:41:00'),
+(50, 10, 24, '1', '', 'First Year', 'First Semester', '2024-2025', '2025-10-17 09:52 AM', 'Monday', '13:00:00', '14:59:00');
 
 -- --------------------------------------------------------
 
@@ -399,7 +403,9 @@ INSERT INTO `web_users` (`web_id`, `email`, `usertype`) VALUES
 (1, 'gail123@gmail.com', 'a'),
 (3, 'angel@gmail.com', 't'),
 (5, 'bong@gmail.com', 't'),
-(8, 'genda@gmail.com', 't');
+(8, 'genda@gmail.com', 't'),
+(10, 'rjbrion', 't'),
+(11, 'joel123', 't');
 
 --
 -- Indexes for dumped tables
@@ -489,7 +495,7 @@ ALTER TABLE `student_grades`
 -- AUTO_INCREMENT for table `student_missing_requirements`
 --
 ALTER TABLE `student_missing_requirements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `student_users`
@@ -507,19 +513,19 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `teachers`
 --
 ALTER TABLE `teachers`
-  MODIFY `t_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `t_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `teacher_subjects`
 --
 ALTER TABLE `teacher_subjects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
 
 --
 -- AUTO_INCREMENT for table `web_users`
 --
 ALTER TABLE `web_users`
-  MODIFY `web_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `web_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables
