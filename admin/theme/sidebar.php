@@ -17,7 +17,19 @@
                     <li><a href="courses.php"><i class="fa-solid fa-graduation-cap"></i> Courses</a></li>
                 </ul>
             </li>
-            <li><a href="students.php"><i class="fa-solid fa-user-graduate"></i> Students</a></li>
+            <li class="has-submenu">
+                <a href="#" class="submenu-toggle">
+                    <div>
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <span style="padding-left: 12px;"> Students</span>
+                    </div>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </a>
+                <ul class="submenu">
+                    <li><a href="students.php"><i class="fa-solid fa-calculator"></i> Student Grades</a></li>
+                    <li><a href="students_add.php"><i class="fa-solid fa-user-plus"></i> Add Student</a></li>
+                </ul>
+            </li>
             <li><a href="settings.php"><i class="fa-solid fa-cogs"></i> Settings</a></li>
         </ul>
         <ul class="navigation">
