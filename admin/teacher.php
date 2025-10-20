@@ -51,14 +51,14 @@ $row_count = 1;
         <main class="main">
 
             <div class="main-wrapper" style="padding: 4%;">
-                <h2 class="text-center" style="font-weight: 800; text-transform:uppercase">New Instructor Setup</h2>
+                <h2 class="text-center" style="font-weight: 800; text-transform:uppercase">Add Instructor Setup</h2>
                 <!-- Modal trigger button -->
                 <button
                     type="button"
                     class="btn btn-primary"
                     data-bs-toggle="modal"
                     data-bs-target="#addTeacher">
-                    <i class="fa fa-plus-circle"></i> Add Teacher
+                    <i class="fa fa-plus-circle"></i> Add Instructor
                 </button>
 
                 <?php if (isset($_SESSION['error'])): ?>
@@ -90,9 +90,9 @@ $row_count = 1;
                         <thead class="table-dark">
                             <tr>
                                 <th>#</th>
-                                <th>Faculty Name</th>
+                                <th>Name</th>
                                 <th>Status</th>
-                                <th>Faculty User Name</th>
+                                <th>User Name</th>
                                 <th>Gender</th>
                                 <th>Action</th>
                             </tr>

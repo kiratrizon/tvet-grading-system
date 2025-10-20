@@ -48,7 +48,7 @@ $result = $conn->query("
         <main class="main">
 
             <div class="main-wrapper" style="padding: 4%;">
-                <h2 class="text-center" style="font-weight: 800; text-transform:uppercase">Create Subjects</h2>
+                <h2 class="text-center" style="font-weight: 800; text-transform:uppercase">Add Subjects</h2>
                 <!-- Modal trigger button -->
                 <button
                     type="button"
@@ -148,16 +148,16 @@ $result = $conn->query("
                         <div class="curriculum-section course-<?= strtolower(str_replace(' ', '-', $course)) ?>">
                             <div class="heading text-center mt-5">
                                 <?php if ($course == 'DBOT'): ?>
-                                    <h1 style="font-size: 24px; font-weight: 700; color:#8F00FF; line-height:1;">Leading to Bachelor of Science in Business Administration</h1> <!-- Display Course Name -->
+                                    <h1 style="font-size: 24px; font-weight: 700; color:#8F00FF; line-height:1;">Diploma in Business Operation Technology</h1> <!-- Display Course Name -->
                                 <?php endif; ?>
                                 <?php if ($course == 'DSOT'): ?>
-                                    <h1 style="font-size: 24px; font-weight: 700; color:#8F00FF; line-height:1;">Leading to Bachelor of Science in Criminology</h1> <!-- Display Course Name -->
+                                    <h1 style="font-size: 24px; font-weight: 700; color:#8F00FF; line-height:1;">Diploma in Security Operation Technology</h1> <!-- Display Course Name -->
                                 <?php endif; ?>
                                 <?php if ($course == 'DIST'): ?>
-                                    <h1 style="font-size: 24px; font-weight: 700; color:#8F00FF; line-height:1;">Leading to Bachelor of Science in Information Systems</h1> <!-- Display Course Name -->
+                                    <h1 style="font-size: 24px; font-weight: 700; color:#8F00FF; line-height:1;">Diploma in Information Systems Technology</h1> <!-- Display Course Name -->
                                 <?php endif; ?>
                                 <?php if ($course == 'DIT'): ?>
-                                    <h1 style="font-size: 24px; font-weight: 700; color:#8F00FF; line-height:1;">Leading to Bachelor of Science in Information Technology</h1> <!-- Display Course Name -->
+                                    <h1 style="font-size: 24px; font-weight: 700; color:#8F00FF; line-height:1;">Diploma Information Technology</h1> <!-- Display Course Name -->
                                 <?php endif; ?>
                             </div>
 

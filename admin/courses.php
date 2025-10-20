@@ -84,7 +84,7 @@ $row_count = 1;
                     data-bs-toggle="modal"
                     data-bs-target="#course">
                     <i class="fa fa-plus-circle"></i>
-                    Assign Course
+                    Add Course
                 </button>
 
                 <div class="card shadow p-5 mt-4">

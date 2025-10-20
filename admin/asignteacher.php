@@ -106,7 +106,7 @@ $assignTeachers = $conn->query("
         </div>
         <main class="main">
             <div class="main-wrapper" style="padding: 4%;">
-                <h2 class="text-center" style="font-weight: 800; text-transform:uppercase">Create and Assign Instructors</h2>
+                <h2 class="text-center" style="font-weight: 800; text-transform:uppercase">Add and Assign Instructors</h2>
                 <!-- Modal trigger button -->
                 <div class="message">
                     <?php if (isset($_SESSION['error'])): ?>
@@ -141,7 +141,7 @@ $assignTeachers = $conn->query("
                     data-bs-toggle="modal"
                     data-bs-target="#assignTeacher">
                     <i class="fa fa-plus-circle"></i>
-                    Assign Teacher
+                    Assign Schedule to Instructor
                 </button>
 
 
@@ -150,9 +150,9 @@ $assignTeachers = $conn->query("
                         <thead class="table-dark">
                             <tr>
                                 <th>#</th>
-                                <th>Faculty Name</th>
+                                <th>Name</th>
                                 <th>Course Code</th>
-                                <th>Assign Subject</th>
+                                <th>Assigned Subject</th>
                                 <th>Schedule</th>
                                 <th>Action</th>
                             </tr>
