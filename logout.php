@@ -12,7 +12,10 @@ if (empty($usermail)) {
     exit;
 }
 
-$conn->query("UPDATE teachers SET status = 0 WHERE t_user_name = '$usermail'");
+$userType = $_SESSION["usertype"] ?? '';
+if ($userType == 't') {
+    $conn->query("UPDATE teachers SET status = 0 WHERE t_user_name = '$usermail'");
+}
 
 
 $_SESSION = array();
