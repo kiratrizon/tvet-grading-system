@@ -11,7 +11,7 @@ $result = $conn->query("
     ORDER BY 
     FIELD(subjects.s_year_level, 'First Year', 'Second Year', 'Third Year'), 
     FIELD(subjects.s_semester, 'First Semester', 'Second Semester', 'Summer')
-");
+")->fetch_all(MYSQLI_ASSOC);
 
 
 
@@ -89,7 +89,7 @@ $result = $conn->query("
                 $subjects = [];
 
                 // Fetch data from database
-                while ($row = $result->fetch_assoc()) {
+                foreach ($result as $row){
                     $course = $row['course_code'];
                     $year_level = strtolower(str_replace(' ', '-', $row['s_year_level']));
                     $semester = $row['s_semester'];
@@ -564,7 +564,7 @@ $result = $conn->query("
     <script>
         $(document).ready(function() {
             // Default na course na ipapakita sa unang pag-load (puwede mong palitan ng course code na gusto mo)
-            let selectedCourse = "DIT"; // Halimbawa, DIT ang unang course na ipapakita
+            let selectedCourse = "dit"; // Halimbawa, DIT ang unang course na ipapakita
             let selectedYear = "all";
 
             function filterContent() {

@@ -2,6 +2,7 @@
 
 session_start();
 require_once '../config/conn.php';
+require_once '../config/myTools.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user'] == "" || $_SESSION['usertype'] != 't') {
     header("location: ../index.php");
@@ -10,9 +11,34 @@ if (!isset($_SESSION['user']) || $_SESSION['user'] == "" || $_SESSION['usertype'
 
 $teacher_id = $_SESSION['teacher_id'];
 
+$conditions = [
+    "ts.teacher_id = '$teacher_id'",
+];
+
+$course_filter = null;
+$semester_filter = null;
+$school_year_filter = null;
+
+if (isset($_GET['course']) && !empty($_GET['course'])) {
+    $course_filter = $conn->real_escape_string($_GET['course']);
+    $conditions[] = "c.id = '$course_filter'";
+}
+
+if (isset($_GET['semester']) && !empty($_GET['semester'])) {
+    $semester_filter = $conn->real_escape_string($_GET['semester']);
+    $conditions[] = "ts.semester = '$semester_filter'";
+}
+
+if (isset($_GET['school_year']) && !empty($_GET['school_year'])) {
+    $school_year_filter = $conn->real_escape_string($_GET['school_year']);
+    $conditions[] = "ts.school_year = '$school_year_filter'";
+}
+
+$where_clause = implode(" AND ", $conditions);
 
 $mysubjects = $conn->query("
     SELECT 
+        ts.id,
         s.s_course_code,
         ts.school_year, 
         ts.year_level, 
@@ -23,15 +49,18 @@ $mysubjects = $conn->query("
         c.course_name, 
         c.id AS course_id, 
         c.course_code AS CC, 
-        s.s_descriptive_title 
+        s.s_descriptive_title,
+        count(gc.id) AS criteria_count
     FROM teacher_subjects ts
     JOIN subjects s ON ts.subject_id = s.s_id
     JOIN courses c ON s.s_course = c.id
-    WHERE ts.teacher_id = '$teacher_id'
+    LEFT JOIN grading_criteria gc ON ts.id = gc.teacher_subject_id
+    WHERE $where_clause
+    GROUP BY ts.id
 ");
 
 
-$year_levels = $conn->query("SELECT DISTINCT year_level FROM teacher_subjects WHERE teacher_id = '$teacher_id'");
+// $year_levels = $conn->query("SELECT DISTINCT year_level FROM teacher_subjects WHERE teacher_id = '$teacher_id'");
 $courses = $conn->query("
     SELECT DISTINCT c.id, c.course_name 
     FROM teacher_subjects ts
@@ -41,7 +70,7 @@ $courses = $conn->query("
 ");
 $semesters = $conn->query("SELECT DISTINCT semester FROM teacher_subjects WHERE teacher_id = '$teacher_id'");
 $school_years = $conn->query("SELECT DISTINCT school_year FROM teacher_subjects WHERE teacher_id = '$teacher_id'");
-$sections = $conn->query("SELECT DISTINCT section FROM teacher_subjects WHERE teacher_id = '$teacher_id'");
+// $sections = $conn->query("SELECT DISTINCT section FROM teacher_subjects WHERE teacher_id = '$teacher_id'");
 
 ?>
 
@@ -60,6 +89,12 @@ $sections = $conn->query("SELECT DISTINCT section FROM teacher_subjects WHERE te
     <link rel="stylesheet" href="../public/fonts/css/all.min.css">
     <link rel="stylesheet" href="../public/style/loading.css">
     <title>My Subjects</title>
+    <style>
+        [class*="add-criteria-"] i, [class*="edit-criteria-"] i {
+            pointer-events: none;
+        }
+
+    </style>
 </head>
 
 <body>
@@ -105,18 +140,10 @@ $sections = $conn->query("SELECT DISTINCT section FROM teacher_subjects WHERE te
                 <!-- Filters -->
                 <div class="row mb-4">
                     <div class="col-md-2">
-                        <select id="filterYear" class="form-control">
-                            <option value="">Select Year Level</option>
-                            <?php while ($row = $year_levels->fetch_assoc()): ?>
-                                <option value="<?= $row['year_level'] ?>"><?= $row['year_level'] ?></option>
-                            <?php endwhile; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
                         <select id="filterCourse" class="form-control">
                             <option value="">Select Course</option>
                             <?php while ($row = $courses->fetch_assoc()): ?>
-                                <option value="<?= $row['id'] ?>"><?= $row['course_name'] ?></option>
+                                <option value="<?= $row['id'] ?>" <?= $course_filter == $row['id'] ? 'selected' : '' ?>><?= $row['course_name'] ?></option>
                             <?php endwhile; ?>
                         </select>
                     </div>
@@ -124,7 +151,7 @@ $sections = $conn->query("SELECT DISTINCT section FROM teacher_subjects WHERE te
                         <select id="filterSemester" class="form-control">
                             <option value="">Select Semester</option>
                             <?php while ($row = $semesters->fetch_assoc()): ?>
-                                <option value="<?= $row['semester'] ?>"><?= $row['semester'] ?></option>
+                                <option value="<?= $row['semester'] ?>" <?= $semester_filter == $row['semester'] ? 'selected' : '' ?>><?= $row['semester'] ?></option>
                             <?php endwhile; ?>
                         </select>
                     </div>
@@ -132,17 +159,14 @@ $sections = $conn->query("SELECT DISTINCT section FROM teacher_subjects WHERE te
                         <select id="filterSchoolYear" class="form-control">
                             <option value="">Select School Year</option>
                             <?php while ($row = $school_years->fetch_assoc()): ?>
-                                <option value="<?= $row['school_year'] ?>"><?= $row['school_year'] ?></option>
+                                <option value="<?= $row['school_year'] ?>" <?= $school_year_filter == $row['school_year'] ? 'selected' : '' ?>><?= $row['school_year'] ?></option>
                             <?php endwhile; ?>
                         </select>
                     </div>
+
                     <div class="col-md-2">
-                        <select id="filterSection" class="form-control">
-                            <option value="">Select Section</option>
-                            <?php while ($row = $sections->fetch_assoc()): ?>
-                                <option value="<?= $row['section'] ?>"><?= $row['section'] ?></option>
-                            <?php endwhile; ?>
-                        </select>
+                        <button id="applyFilters" class="btn btn-primary">Search</button>
+                        <button id="clearFilters" class="btn btn-secondary">Clear</button>
                     </div>
                 </div>
 
@@ -154,15 +178,26 @@ $sections = $conn->query("SELECT DISTINCT section FROM teacher_subjects WHERE te
                             data-semester="<?= $subject['semester'] ?>"
                             data-school-year="<?= $subject['school_year'] ?>"
                             data-section="<?= $subject['section'] ?>">
-                            <a href="importstudents.php?subject=<?= urlencode($subject['s_course_code']) ?>&title=<?= urlencode($subject['s_descriptive_title']) ?>&course=<?= urlencode($subject['CC']) ?>&year=<?= urlencode($subject['year_level']) ?>&semester=<?= urlencode($subject['semester']) ?>&school_year=<?= urlencode($subject['school_year']) ?>&section=<?= urlencode($subject['section']) ?>&subject_id=<?= urlencode($subject['subject_id']) ?>&teacher_id=<?= urlencode($teacher_id) ?>&course_id=<?= urlencode($subject['course_id']); ?>">
+                            <a href="importstudents.php?teacher_subject=<?= $subject['id'] ?>">
 
                                 <div class="card-content">
                                     <ul>
-                                        <li>
+                                        <li class="d-flex justify-content-between">
                                             <h5><?= $subject['year_level'] ?></h5>
+                                            <?php if ($subject['criteria_count'] == 0) { ?>
+                                                <button class="btn add-criteria-<?= $subject['id'] ?>" onclick="addCriteria(event, '<?= $subject['id'] ?>')">
+                                                    <i class="fa-solid fa-square-plus"></i>
+                                                </button>
+                                                <?php } else { ?>
+                                                <button class="btn edit-criteria-<?= $subject['id'] ?>" onclick="addCriteria(event, '<?= $subject['id'] ?>')">
+                                                    <i class="fa-solid fa-pen"></i>
+                                                </button>
+                                                <?php }
+                                            ?>
+
                                         </li>
                                         <li>
-                                            <h5 style="font-weight: 900; line-height:1;color: #321337;"><?= $subject['course_name'] ?></h5>
+                                            <h5 style="font-weight: 900; line-height:1;color: <?= $subject['criteria_count'] > 0 ? '#321337' : '#6c757d'; ?>"><?= $subject['course_name'] ?></h5>
                                         </li>
                                         <li>
                                             <h5><?= $subject['s_course_code'] ?></h5>
@@ -170,7 +205,6 @@ $sections = $conn->query("SELECT DISTINCT section FROM teacher_subjects WHERE te
                                         <li><span><?= $subject['s_descriptive_title'] ?></span></li>
                                         <li><span><?= $subject['school_year'] ?></span></li>
                                         <li><span><?= $subject['semester'] ?></span></li>
-                                        <li><span>Section: <?= $subject['section'] ?></span></li>
                                     </ul>
                                 </div>
                             </a>
@@ -183,55 +217,50 @@ $sections = $conn->query("SELECT DISTINCT section FROM teacher_subjects WHERE te
     </div>
 
     <script>
+        function addCriteria(e, subjectId) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = `add_criteria.php?ts_id=${subjectId}`;
+        }
         $(document).ready(function() {
-            function filterSubjects() {
-                let year = $('#filterYear').val();
-                let course = $('#filterCourse').val();
-                let semester = $('#filterSemester').val();
-                let schoolYear = $('#filterSchoolYear').val();
-                let section = $('#filterSection').val();
+            $('#applyFilters').on('click', function() {
+                const course = $('#filterCourse').val();
+                const semester = $('#filterSemester').val();
+                const school_year = $('#filterSchoolYear').val();
 
-                let count = 0;
-                $('.subject-card').each(function() {
-                    let show = true;
-                    if (year && $(this).data('year') != year) show = false;
-                    if (course && $(this).data('course') != course) show = false;
-                    if (semester && $(this).data('semester') != semester) show = false;
-                    if (schoolYear && $(this).data('school-year') != schoolYear) show = false;
-                    if (section && $(this).data('section') != section) show = false;
+                let queryParams = [];
 
-                    if (show) {
-                        count++;
-                        if (count <= 1) {
-                            $(this).show();
-                        } else {
-                            $(this).hide();
-                        }
-                    } else {
-                        $(this).hide();
-                    }
-                });
-
-                if ($('.subject-card:visible').length < $('.subject-card').length) {
-                    $('#showMore').show();
-                } else {
-                    $('#showMore').hide();
+                if (course) {
+                    queryParams.push(`course=${encodeURIComponent(course)}`);
                 }
-            }
+                if (semester) {
+                    queryParams.push(`semester=${encodeURIComponent(semester)}`);
+                }
+                if (school_year) {
+                    queryParams.push(`school_year=${encodeURIComponent(school_year)}`);
+                }
 
-            function showAllSubjects() {
-                $('.subject-card').show();
-                $('#showMore').hide();
-            }
+                const queryString = queryParams.length ? `?${queryParams.join('&')}` : '';
+                window.location.href = `mysubjects.php${queryString}`;
+            });
 
-            $('#filterYear, #filterCourse, #filterSemester, #filterSchoolYear, #filterSection').change(filterSubjects);
-            $('#showMore').click(showAllSubjects);
+            $('#clearFilters').on('click', function() {
+                window.location.href = 'mysubjects.php';
+            });
 
-            // Initial load: limit to 1 subject
-            $('.subject-card:gt(0)').hide();
-            if ($('.subject-card').length > 1) {
-                $('#showMore').show();
-            }
+            $(document).on("mouseover", "button[class*='add-criteria-']", function() {
+                $(this).html(`Add Criteria <i class="fa-solid fa-square-plus"></i>`);
+            });
+            $(document).on("mouseout", "button[class*='add-criteria-']", function() {
+                $(this).html(`<i class="fsolid-regular fa-square-plus"></i>`);
+            });
+
+            $(document).on("mouseover", "button[class*='edit-criteria-']", function() {
+                $(this).html(`Edit Criteria <i class="fa-solid fa-pen"></i>`);
+            });
+            $(document).on("mouseout", "button[class*='edit-criteria-']", function() {
+                $(this).html(`<i class="fa-solid fa-pen"></i>`);
+            });
         });
     </script>
 

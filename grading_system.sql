@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Oct 17, 2025 at 02:04 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: db
+-- Generation Time: Oct 21, 2025 at 09:38 AM
+-- Server version: 8.0.43
+-- PHP Version: 8.3.26
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -28,11 +28,11 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `admin` (
-  `a_id` int(11) NOT NULL,
-  `a_name` text NOT NULL,
-  `a_user_name` text NOT NULL,
-  `a_password` text NOT NULL,
-  `a_image` text NOT NULL
+  `a_id` int NOT NULL,
+  `a_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `a_user_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `a_password` text COLLATE utf8mb4_general_ci NOT NULL,
+  `a_image` text COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -49,9 +49,9 @@ INSERT INTO `admin` (`a_id`, `a_name`, `a_user_name`, `a_password`, `a_image`) V
 --
 
 CREATE TABLE `courses` (
-  `id` int(11) NOT NULL,
-  `course_code` varchar(20) NOT NULL,
-  `course_name` varchar(100) NOT NULL
+  `id` int NOT NULL,
+  `course_code` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `course_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -67,24 +67,49 @@ INSERT INTO `courses` (`id`, `course_code`, `course_name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `grading_criteria`
+--
+
+CREATE TABLE `grading_criteria` (
+  `id` int NOT NULL,
+  `teacher_subject_id` int NOT NULL,
+  `criteria_name` varchar(255) NOT NULL,
+  `percentage` float NOT NULL,
+  `deleted` int NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `grading_criteria`
+--
+
+INSERT INTO `grading_criteria` (`id`, `teacher_subject_id`, `criteria_name`, `percentage`, `deleted`) VALUES
+(66, 47, 'Quizzes', 20, 0),
+(68, 47, 'Attendance', 10, 0),
+(69, 47, 'Exam', 30, 0),
+(77, 47, 'Oral', 30, 0),
+(78, 47, 'Projects', 10, 0);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `student_grades`
 --
 
 CREATE TABLE `student_grades` (
-  `id` int(11) NOT NULL,
-  `student_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `course` varchar(100) NOT NULL,
-  `year_level` varchar(150) NOT NULL,
-  `semester` varchar(150) NOT NULL,
-  `school_year` varchar(120) NOT NULL,
-  `course_code` varchar(150) NOT NULL,
-  `descriptive_title` varchar(255) NOT NULL,
+  `id` int NOT NULL,
+  `student_id` int NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `course` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `year_level` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `semester` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `school_year` varchar(120) COLLATE utf8mb4_general_ci NOT NULL,
+  `course_code` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
+  `descriptive_title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `final_rating` decimal(3,1) NOT NULL,
-  `remarks` varchar(100) NOT NULL,
-  `teacher_id` int(11) NOT NULL,
-  `subject_id` int(11) NOT NULL,
-  `section` text NOT NULL
+  `remarks` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `teacher_id` int NOT NULL,
+  `subject_id` int NOT NULL,
+  `section` text COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -107,18 +132,33 @@ INSERT INTO `student_grades` (`id`, `student_id`, `name`, `course`, `year_level`
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `student_grades_v2`
+--
+
+CREATE TABLE `student_grades_v2` (
+  `id` int NOT NULL,
+  `student_id` int NOT NULL,
+  `prelim` float NOT NULL,
+  `midterm` float NOT NULL,
+  `finals` float NOT NULL,
+  `teacher_subject_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `student_missing_requirements`
 --
 
 CREATE TABLE `student_missing_requirements` (
-  `id` int(11) NOT NULL,
-  `student_id` int(11) NOT NULL,
-  `subject_id` int(11) NOT NULL,
-  `missing_requirement` text NOT NULL,
-  `flagged_by_teacher` int(11) NOT NULL,
-  `flagged_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `studid` int(11) NOT NULL,
-  `remarks` text NOT NULL
+  `id` int NOT NULL,
+  `student_id` int NOT NULL,
+  `subject_id` int NOT NULL,
+  `missing_requirement` text COLLATE utf8mb4_general_ci NOT NULL,
+  `flagged_by_teacher` int NOT NULL,
+  `flagged_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `studid` int NOT NULL,
+  `remarks` text COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -128,12 +168,12 @@ CREATE TABLE `student_missing_requirements` (
 --
 
 CREATE TABLE `student_users` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `course` varchar(50) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `s_image` text NOT NULL
+  `id` int NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `course` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `s_image` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -151,7 +191,8 @@ INSERT INTO `student_users` (`id`, `name`, `course`, `email`, `password`, `s_ima
 (37, 'Luzviminda Aguinaldo', '1', 'luzvimindaaguinaldo@school.edu', '$2y$10$Wp2.zgjItf7CpSMvHIyx.O.b7tmK3t89Ib7g3RbfSmtYZGBX6eT5a', ''),
 (38, 'Crisanto Silang', '1', 'crisantosilang@school.edu', '$2y$10$9qOpeMJK3OF7gINmxWjL6.3g9PSEhzR9KSggZV3xf2JiXzhq9iI2a', ''),
 (39, 'Severina Gomburza', '1', 'severinagomburza@school.edu', '$2y$10$9E4xB9LyFleY3MJ6zxCzo.6k9ER1ZlnQi7qLVRwFSYYZuAQ4LhbUG', ''),
-(40, 'Damiana Malvar', '1', 'damianamalvar@school.edu', '$2y$10$Ie7xyQ4OmXzhJhU0SjtAJ.3/H8hEX36M/iqMWsaYIAhNQjceKUITu', '');
+(40, 'Damiana Malvar', '1', 'damianamalvar@school.edu', '$2y$10$Ie7xyQ4OmXzhJhU0SjtAJ.3/H8hEX36M/iqMWsaYIAhNQjceKUITu', ''),
+(41, 'Throy Tower', '1', 'tgenesistroy@gmail.com', '$2y$10$PJCze8rCgUDxcRkobXpQSuYRRcZQser57CeuXs7CcdTB8ldoiQH56', NULL);
 
 -- --------------------------------------------------------
 
@@ -160,18 +201,18 @@ INSERT INTO `student_users` (`id`, `name`, `course`, `email`, `password`, `s_ima
 --
 
 CREATE TABLE `subjects` (
-  `s_id` int(11) NOT NULL,
-  `s_semester` text NOT NULL,
-  `s_course_code` text NOT NULL,
-  `s_descriptive_title` text NOT NULL,
-  `s_nth` text NOT NULL,
-  `s_units` text NOT NULL,
-  `s_lee` text NOT NULL,
-  `s_lab` int(11) NOT NULL DEFAULT 0,
-  `s_covered_qualification` text NOT NULL,
-  `s_pre_requisite` text NOT NULL,
-  `s_year_level` text NOT NULL,
-  `s_course` text NOT NULL
+  `s_id` int NOT NULL,
+  `s_semester` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_course_code` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_descriptive_title` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_nth` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_units` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_lee` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_lab` int NOT NULL DEFAULT '0',
+  `s_covered_qualification` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_pre_requisite` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_year_level` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_course` text COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -330,13 +371,13 @@ INSERT INTO `subjects` (`s_id`, `s_semester`, `s_course_code`, `s_descriptive_ti
 --
 
 CREATE TABLE `teachers` (
-  `t_id` int(11) NOT NULL,
-  `t_name` text NOT NULL,
-  `t_user_name` text NOT NULL,
-  `t_password` text NOT NULL,
-  `t_gender` text NOT NULL,
-  `status` int(11) NOT NULL DEFAULT 0,
-  `t_image` text NOT NULL
+  `t_id` int NOT NULL,
+  `t_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `t_user_name` text COLLATE utf8mb4_general_ci NOT NULL,
+  `t_password` text COLLATE utf8mb4_general_ci NOT NULL,
+  `t_gender` text COLLATE utf8mb4_general_ci NOT NULL,
+  `status` int NOT NULL DEFAULT '0',
+  `t_image` text COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -347,7 +388,7 @@ INSERT INTO `teachers` (`t_id`, `t_name`, `t_user_name`, `t_password`, `t_gender
 (2, 'Angel Seclon', 'angel@gmail.com', 'angel231', 'female', 0, 'img_67c1f2ad0b85e3.30140365.jpg'),
 (4, 'Bing Bong Abarca', 'bong@gmail.com', 'bong123', 'male', 0, 'img_67c424352b44e9.83923320.jpg'),
 (7, 'Genda Necio', 'genda@gmail.com', 'genda123', 'female', 0, 'img_67c531dc4c17f3.71495902.jpg'),
-(9, 'Angel Abellanosa', 'rjbrion', '2213', 'male', 1, ''),
+(9, 'Angel Abellanosa', 'rjbrion', '2213', 'male', 0, ''),
 (10, 'Joel Miller Go', 'joel123', '2213', 'male', 0, '');
 
 -- --------------------------------------------------------
@@ -357,31 +398,54 @@ INSERT INTO `teachers` (`t_id`, `t_name`, `t_user_name`, `t_password`, `t_gender
 --
 
 CREATE TABLE `teacher_subjects` (
-  `id` int(11) NOT NULL,
-  `teacher_id` int(11) NOT NULL,
-  `subject_id` int(11) NOT NULL,
-  `course` varchar(50) NOT NULL,
-  `section` varchar(50) NOT NULL,
-  `year_level` varchar(100) NOT NULL,
-  `semester` varchar(100) NOT NULL,
-  `school_year` text NOT NULL,
-  `assigned_date` text NOT NULL,
-  `schedule_day` varchar(255) NOT NULL,
+  `id` int NOT NULL,
+  `teacher_id` int NOT NULL,
+  `subject_id` int NOT NULL,
+  `course` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `section` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `year_level` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `semester` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `school_year` text COLLATE utf8mb4_general_ci NOT NULL,
+  `assigned_date` text COLLATE utf8mb4_general_ci NOT NULL,
+  `schedule_day` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `schedule_time_start` time NOT NULL,
-  `schedule_time_end` time NOT NULL
+  `schedule_time_end` time NOT NULL,
+  `room_id` int DEFAULT NULL,
+  `m` int DEFAULT NULL,
+  `t` int DEFAULT NULL,
+  `w` int DEFAULT NULL,
+  `th` int DEFAULT NULL,
+  `f` int DEFAULT NULL,
+  `s` int DEFAULT NULL,
+  `ss` int DEFAULT NULL,
+  `m_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `t_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `w_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `th_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `f_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `s_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ss_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `m_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `t_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `w_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `th_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `f_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `s_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `ss_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `teacher_subjects`
 --
 
-INSERT INTO `teacher_subjects` (`id`, `teacher_id`, `subject_id`, `course`, `section`, `year_level`, `semester`, `school_year`, `assigned_date`, `schedule_day`, `schedule_time_start`, `schedule_time_end`) VALUES
-(35, 2, 3, '7', 'DBOT 2B', 'First Year', 'First Semester', '2024-2025', '2025-03-13 11:43 PM', 'Thursday', '13:30:00', '14:30:00'),
-(37, 4, 24, '1', 'DIT 2B', 'First Year', 'First Semester', '2024-2025', '2025-03-13 11:50 PM', 'Monday', '13:30:00', '14:30:00'),
-(41, 7, 5, '7', 'DBOT 2D', 'First Year', 'First Semester', '2024-2025', '2025-03-14 12:41 AM', 'Thursday', '13:30:00', '14:30:00'),
-(42, 2, 3, '7', 'DBOT 2D', 'First Year', 'First Semester', '2024-2025', '2025-03-14 02:59 AM', 'Tuesday', '13:30:00', '14:30:00'),
-(47, 9, 3, '7', '', 'First Year', 'First Semester', '2024-2025', '2025-10-17 08:42 AM', 'Monday', '10:41:00', '12:41:00'),
-(50, 10, 24, '1', '', 'First Year', 'First Semester', '2024-2025', '2025-10-17 09:52 AM', 'Monday', '13:00:00', '14:59:00');
+INSERT INTO `teacher_subjects` (`id`, `teacher_id`, `subject_id`, `course`, `section`, `year_level`, `semester`, `school_year`, `assigned_date`, `schedule_day`, `schedule_time_start`, `schedule_time_end`, `room_id`, `m`, `t`, `w`, `th`, `f`, `s`, `ss`, `m_start`, `t_start`, `w_start`, `th_start`, `f_start`, `s_start`, `ss_start`, `m_end`, `t_end`, `w_end`, `th_end`, `f_end`, `s_end`, `ss_end`) VALUES
+(35, 2, 3, '7', 'DBOT 2B', 'First Year', 'First Semester', '2024-2025', '2025-03-13 11:43 PM', 'Thursday', '13:30:00', '14:30:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', ''),
+(37, 4, 24, '1', 'DIT 2B', 'First Year', 'First Semester', '2024-2025', '2025-03-13 11:50 PM', 'Monday', '13:30:00', '14:30:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', ''),
+(41, 7, 5, '7', 'DBOT 2D', 'First Year', 'First Semester', '2024-2025', '2025-03-14 12:41 AM', 'Thursday', '13:30:00', '14:30:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', ''),
+(42, 2, 3, '7', 'DBOT 2D', 'First Year', 'First Semester', '2024-2025', '2025-03-14 02:59 AM', 'Tuesday', '13:30:00', '14:30:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', ''),
+(47, 9, 3, '7', '', 'First Year', 'First Semester', '2024-2025', '2025-10-17 08:42 AM', 'Monday', '10:41:00', '12:41:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', ''),
+(50, 10, 24, '1', '', 'First Year', 'First Semester', '2024-2025', '2025-10-17 09:52 AM', 'Monday', '13:00:00', '14:59:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', ''),
+(51, 9, 79, '6', '', 'Second Year', 'Second Semester', '2025-2026', '2025-10-21 10:53 AM', 'Monday', '07:00:00', '09:00:00', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '');
 
 -- --------------------------------------------------------
 
@@ -390,9 +454,9 @@ INSERT INTO `teacher_subjects` (`id`, `teacher_id`, `subject_id`, `course`, `sec
 --
 
 CREATE TABLE `web_users` (
-  `web_id` int(11) NOT NULL,
-  `email` text NOT NULL,
-  `usertype` text NOT NULL
+  `web_id` int NOT NULL,
+  `email` text COLLATE utf8mb4_general_ci NOT NULL,
+  `usertype` text COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -425,9 +489,21 @@ ALTER TABLE `courses`
   ADD UNIQUE KEY `course_code` (`course_code`);
 
 --
+-- Indexes for table `grading_criteria`
+--
+ALTER TABLE `grading_criteria`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `student_grades`
 --
 ALTER TABLE `student_grades`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `student_grades_v2`
+--
+ALTER TABLE `student_grades_v2`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -477,55 +553,67 @@ ALTER TABLE `web_users`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `a_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `a_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `grading_criteria`
+--
+ALTER TABLE `grading_criteria`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
 
 --
 -- AUTO_INCREMENT for table `student_grades`
 --
 ALTER TABLE `student_grades`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=197;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=197;
+
+--
+-- AUTO_INCREMENT for table `student_grades_v2`
+--
+ALTER TABLE `student_grades_v2`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `student_missing_requirements`
 --
 ALTER TABLE `student_missing_requirements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `student_users`
 --
 ALTER TABLE `student_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `subjects`
 --
 ALTER TABLE `subjects`
-  MODIFY `s_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
+  MODIFY `s_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
 
 --
 -- AUTO_INCREMENT for table `teachers`
 --
 ALTER TABLE `teachers`
-  MODIFY `t_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `t_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `teacher_subjects`
 --
 ALTER TABLE `teacher_subjects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `web_users`
 --
 ALTER TABLE `web_users`
-  MODIFY `web_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `web_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables

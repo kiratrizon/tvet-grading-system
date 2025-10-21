@@ -1,6 +1,7 @@
 <?php
 session_start();
 require '../config/conn.php';
+require '../config/myTools.php';
 
 if (!isset($_SESSION['teacher_id'])) {
     header("Location: ../index.php");
@@ -19,25 +20,57 @@ if (isset($_SESSION['user'])) {
 
 
 
-$subject_code = $_GET['subject'] ?? '';
+$teacherSubject = $_GET['teacher_subject'] ?? '';
+if (empty($teacherSubject)) {
+    header("location: mysubjects.php");
+    exit;
+}
 
-$subjects = $conn->query("SELECT id, name, final_rating, remarks, student_id 
-                       FROM student_grades 
-                       WHERE course_code = '$subject_code' ORDER BY name ASC");
+// $subjects = $conn->query("SELECT id, name, final_rating, remarks, student_id 
+//                        FROM student_grades 
+//                        WHERE course_code = '$subject_code' ORDER BY name ASC");
+
+$subjects = [];
 
 $row_count = 1;
 
+$studentGrades = $conn->query("SELECT sgv2.*, su.name AS student_name FROM student_grades_v2 sgv2 join student_users su on sgv2.student_id = su.id where sgv2.teacher_subject_id = '$teacherSubject'")->fetch_all(MYSQLI_ASSOC);
+
+// myTools::display(json_encode($studentGrades));exit;
+
+$teacherSubjectDetails = $conn->query("SELECT ts.*, s.s_course_code, s.s_descriptive_title, c.course_name, c.id AS course_id
+                                        FROM teacher_subjects ts
+                                        JOIN subjects s ON ts.subject_id = s.s_id
+                                        JOIN courses c ON ts.course = c.id
+                                        WHERE ts.id = '$teacherSubject'")->fetch_assoc();
+
+if (!$teacherSubjectDetails) {
+    header("location: mysubjects.php");
+    exit;
+}
+
+$subject_code = $teacherSubjectDetails['s_course_code'];
+$descriptiveTitle = $teacherSubjectDetails['s_descriptive_title'];
+$course = $teacherSubjectDetails['course_name'];
+$year_level = $teacherSubjectDetails['year_level'];
+$semester = $teacherSubjectDetails['semester'];
+$school_year = $teacherSubjectDetails['school_year'];
+$subject_id = $teacherSubjectDetails['subject_id'];
+$course_id = $teacherSubjectDetails['course'];
+$section = '';
 
 
-$subject_code = isset($_GET['subject']) ? urldecode($_GET['subject']) : '';
-$descriptiveTitle = isset($_GET['title']) ? urldecode($_GET['title']) : '';
-$course = isset($_GET['course']) ? urldecode($_GET['course']) : '';
-$year_level = isset($_GET['year']) ? urldecode($_GET['year']) : '';
-$semester = isset($_GET['semester']) ? urldecode($_GET['semester']) : '';
-$school_year = isset($_GET['school_year']) ? urldecode($_GET['school_year']) : '';
-$subject_id = isset($_GET['subject_id']) ? urldecode($_GET['subject_id']) : '';
-$course_id = isset($_GET['course_id']) ? urldecode($_GET['course_id']) : '';
-$section = isset($_GET['section']) ? urldecode($_GET['section']) : '';
+// $subject_code = isset($_GET['subject']) ? urldecode($_GET['subject']) : '';
+// $descriptiveTitle = isset($_GET['title']) ? urldecode($_GET['title']) : '';
+// $course = isset($_GET['course']) ? urldecode($_GET['course']) : '';
+// $year_level = isset($_GET['year']) ? urldecode($_GET['year']) : '';
+// $semester = isset($_GET['semester']) ? urldecode($_GET['semester']) : '';
+// $school_year = isset($_GET['school_year']) ? urldecode($_GET['school_year']) : '';
+// $subject_id = isset($_GET['subject_id']) ? urldecode($_GET['subject_id']) : '';
+// $course_id = isset($_GET['course_id']) ? urldecode($_GET['course_id']) : '';
+// $section = isset($_GET['section']) ? urldecode($_GET['section']) : '';
+
+
 
 // echo "Subject Code: " . $subject_code . "<br>";
 // echo "Title: " . $descriptiveTitle . "<br>";
@@ -116,7 +149,7 @@ $section = isset($_GET['section']) ? urldecode($_GET['section']) : '';
 
 
                         <div class="d-flex flex-row gap-4">
-                            <input type="file" name="file" required class="form-control">
+                            <input type="file" name="file" accept=".xls,.xlsx,.csv" required class="form-control">
                             <button type="submit" class="btn btn-primary w-50">
                                 <i class="fa-solid fa-file-import"></i> Import Students
                             </button>

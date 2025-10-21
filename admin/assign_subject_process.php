@@ -28,17 +28,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $end_time = $schedule_end_times[$i];
         $section = isset($sections[$i]) ? $sections[$i] : '';
 
-        // CHECK IF TEACHER ALREADY HAS THE SUBJECT FOR THE SAME SECTION
-        $check_subject = $conn->query("SELECT * FROM teacher_subjects 
-                                       WHERE teacher_id='$teacher_id' 
-                                       AND subject_id='$subject_id' 
-                                       AND section='$section'");
-        if ($check_subject->num_rows > 0) {
-            $_SESSION['error'] = "This subject is already assigned to the teacher for section $section.";
-            header("location: asignteacher.php");
-            exit;
-        }
-
         // CHECK FOR SCHEDULE CONFLICT (DIFFERENT TEACHERS, SAME SECTION)
         $check_schedule = $conn->query("SELECT ts.schedule_day, ts.schedule_time_start, ts.schedule_time_end, s.s_descriptive_title, t.t_name, ts.section
                                         FROM teacher_subjects ts

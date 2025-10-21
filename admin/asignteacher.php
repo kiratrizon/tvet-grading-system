@@ -58,7 +58,8 @@ $assignTeachers = $conn->query("
     ORDER BY teachers.t_name ASC
 ");
 
-
+$year = date("Y");
+$schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year + 2)]];
 
 
 ?>
@@ -128,7 +129,7 @@ $assignTeachers = $conn->query("
 
                     <?php if (isset($_SESSION['updated'])): ?>
                         <div class="text-center alert alert-success alert-dismissible fade show" role="alert">
-                            <strong>Success!</strong> <br> Teacher Updated Successfully!
+                            <strong>Success!</strong> <br> Instructor Updated Successfully!
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                         <?php unset($_SESSION['updated']); ?>
@@ -210,16 +211,16 @@ $assignTeachers = $conn->query("
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitleId">Assign Teacher</h5>
+                    <h5 class="modal-title" id="modalTitleId">Assign Instructor</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="assignTeacherForm" action="assign_subject_process.php" method="POST">
                         <div class="d-flex flex-row gap-4 mb-4">
                             <div class="form-group w-100">
-                                <label for="teacher">Teacher:</label>
+                                <label for="teacher">Instructor:</label>
                                 <select name="teacher_id" required class="form-control">
-                                    <option hidden selected disabled>Select Teacher</option>
+                                    <option hidden selected disabled>Select Instructor</option>
                                     <?php
                                     $teachers = $conn->query("SELECT t_id, t_name FROM teachers");
                                     while ($row = $teachers->fetch_assoc()) { ?>
@@ -255,13 +256,15 @@ $assignTeachers = $conn->query("
                             </div>
 
                             <div class="form-group w-100">
-                                <label for="sy">School Year:</label>
-                                <input list="schoolYears" id="sy" name="sy" class="form-control" placeholder="Select or Type School Year">
-                                <datalist id="schoolYears">
-                                    <option value="2024-2025"></option>
-                                    <option value="2025-2026"></option>
-                                    <option value="2026-2027"></option>
-                                </datalist>
+                            <label for="sy">School Year:</label>
+                            <select id="sy" name="sy" class="form-control">
+                                <option value="" selected disabled>Select School Year</option>
+                                <?php foreach ($schoolyears as $sy) {
+                                        $val = join('-', $sy);
+                                ?>
+                                    <option value="<?= $val ?>"><?= $val ?></option>
+                                <?php } ?>
+                            </select>
                             </div>
 
                             <div class="form-group w-100">

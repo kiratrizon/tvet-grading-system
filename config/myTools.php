@@ -42,4 +42,11 @@ class myTools {
         }
         return false;
     }
+
+    // Debugging function
+    public static function display($var) {
+		echo '<pre>';
+		print_r($var);
+		echo '</pre>';
+	}
 }
