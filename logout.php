@@ -5,7 +5,12 @@ session_start();
 
 require_once "config/conn.php";
 
-$usermail = $_SESSION["user"];
+$usermail = $_SESSION["user"] ?? '';
+
+if (empty($usermail)) {
+    header("location: index.php?action=logout");
+    exit;
+}
 
 $conn->query("UPDATE teachers SET status = 0 WHERE t_user_name = '$usermail'");
 
