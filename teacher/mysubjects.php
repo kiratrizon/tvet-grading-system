@@ -252,7 +252,7 @@ $school_years = $conn->query("SELECT DISTINCT school_year FROM teacher_subjects 
                 $(this).html(`Add Criteria <i class="fa-solid fa-square-plus"></i>`);
             });
             $(document).on("mouseout", "button[class*='add-criteria-']", function() {
-                $(this).html(`<i class="fsolid-regular fa-square-plus"></i>`);
+                $(this).html(`<i class="fa-solid fa-square-plus"></i>`);
             });
 
             $(document).on("mouseover", "button[class*='edit-criteria-']", function() {
