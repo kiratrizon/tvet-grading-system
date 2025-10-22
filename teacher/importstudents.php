@@ -184,7 +184,7 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                         <div class="d-flex flex-row gap-4 align-items-center mb-3">
                             <input type="hidden" name="teacher_subject" value="<?= $teacherSubject ?>">
                             <button type="submit" class="btn btn-success" name="print_data">
-                                <i class="fas fa-print" style="font-size: 12px;"></i> Export Students for Grading
+                                <i class="fa-solid fa-file-excel"></i> Generate Grading Template
                             </button>
                         </div>
                     </form>
