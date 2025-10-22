@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Oct 21, 2025 at 09:38 AM
+-- Generation Time: Oct 22, 2025 at 10:07 AM
 -- Server version: 8.0.43
 -- PHP Version: 8.3.26
 
@@ -40,7 +40,8 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`a_id`, `a_name`, `a_user_name`, `a_password`, `a_image`) VALUES
-(1, 'Gail E. Pacquiao', 'gail123@gmail.com', 'gail231', 'img_67c2d1d15c05c8.98660813.jpg');
+(1, 'Gail E. Pacquiao', 'gail123@gmail.com', 'gail231', 'img_67c2d1d15c05c8.98660813.jpg'),
+(2, 'Throy', 'tgenesistroy@gmail.com', 'test', '');
 
 -- --------------------------------------------------------
 
@@ -63,6 +64,51 @@ INSERT INTO `courses` (`id`, `course_code`, `course_name`) VALUES
 (5, 'DIST', 'Diploma in Information Systems Technology'),
 (6, 'DSOT', 'Diploma in Security Operation Technology'),
 (7, 'DBOT', 'Diploma in Business Operation Technology');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `criteria_grades`
+--
+
+CREATE TABLE `criteria_grades` (
+  `id` int NOT NULL,
+  `coverage` int NOT NULL,
+  `criteria_note_record_id` int NOT NULL,
+  `score` varchar(255) NOT NULL,
+  `enrollee_id` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `criteria_grades`
+--
+
+INSERT INTO `criteria_grades` (`id`, `coverage`, `criteria_note_record_id`, `score`, `enrollee_id`) VALUES
+(1, 1, 1, '30/40', 1),
+(2, 1, 1, '25/40', 2),
+(3, 1, 1, '40/40', 3),
+(4, 1, 1, '10/40', 4),
+(5, 1, 1, '30/40', 5),
+(6, 1, 1, '20/40', 6);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `criteria_note_records`
+--
+
+CREATE TABLE `criteria_note_records` (
+  `id` int NOT NULL,
+  `grading_criterion_id` int NOT NULL,
+  `note` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `criteria_note_records`
+--
+
+INSERT INTO `criteria_note_records` (`id`, `grading_criterion_id`, `note`) VALUES
+(1, 66, 'Quiz #1');
 
 -- --------------------------------------------------------
 
@@ -192,7 +238,8 @@ INSERT INTO `student_users` (`id`, `name`, `course`, `email`, `password`, `s_ima
 (38, 'Crisanto Silang', '1', 'crisantosilang@school.edu', '$2y$10$9qOpeMJK3OF7gINmxWjL6.3g9PSEhzR9KSggZV3xf2JiXzhq9iI2a', ''),
 (39, 'Severina Gomburza', '1', 'severinagomburza@school.edu', '$2y$10$9E4xB9LyFleY3MJ6zxCzo.6k9ER1ZlnQi7qLVRwFSYYZuAQ4LhbUG', ''),
 (40, 'Damiana Malvar', '1', 'damianamalvar@school.edu', '$2y$10$Ie7xyQ4OmXzhJhU0SjtAJ.3/H8hEX36M/iqMWsaYIAhNQjceKUITu', ''),
-(41, 'Throy Tower', '1', 'tgenesistroy@gmail.com', '$2y$10$PJCze8rCgUDxcRkobXpQSuYRRcZQser57CeuXs7CcdTB8ldoiQH56', NULL);
+(41, 'Throy Tower', '1', 'tgenesistroy@gmail.com', '$2y$10$PJCze8rCgUDxcRkobXpQSuYRRcZQser57CeuXs7CcdTB8ldoiQH56', NULL),
+(42, 'Monique Erezo', '1', 'moniqueerezo98@gmail.com', '$2y$10$HGrps04BhTg6raTJQn052eqtJoITEHvYj3FtFi2X0n3sRmoZ30KDa', NULL);
 
 -- --------------------------------------------------------
 
@@ -388,7 +435,7 @@ INSERT INTO `teachers` (`t_id`, `t_name`, `t_user_name`, `t_password`, `t_gender
 (2, 'Angel Seclon', 'angel@gmail.com', 'angel231', 'female', 0, 'img_67c1f2ad0b85e3.30140365.jpg'),
 (4, 'Bing Bong Abarca', 'bong@gmail.com', 'bong123', 'male', 0, 'img_67c424352b44e9.83923320.jpg'),
 (7, 'Genda Necio', 'genda@gmail.com', 'genda123', 'female', 0, 'img_67c531dc4c17f3.71495902.jpg'),
-(9, 'Angel Abellanosa', 'rjbrion', '2213', 'male', 0, ''),
+(9, 'Angel Abellanosa', 'rjbrion', '2213', 'male', 1, ''),
 (10, 'Joel Miller Go', 'joel123', '2213', 'male', 0, '');
 
 -- --------------------------------------------------------
@@ -450,6 +497,31 @@ INSERT INTO `teacher_subjects` (`id`, `teacher_id`, `subject_id`, `course`, `sec
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `teacher_subject_enrollees`
+--
+
+CREATE TABLE `teacher_subject_enrollees` (
+  `id` int NOT NULL,
+  `student_id` int NOT NULL,
+  `teacher_subject_id` int NOT NULL,
+  `read_flg` tinyint(1) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `teacher_subject_enrollees`
+--
+
+INSERT INTO `teacher_subject_enrollees` (`id`, `student_id`, `teacher_subject_id`, `read_flg`) VALUES
+(1, 30, 47, 1),
+(2, 31, 47, 1),
+(3, 32, 47, 1),
+(4, 33, 47, 1),
+(5, 34, 47, 1),
+(6, 35, 47, 1);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `web_users`
 --
 
@@ -487,6 +559,18 @@ ALTER TABLE `admin`
 ALTER TABLE `courses`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `course_code` (`course_code`);
+
+--
+-- Indexes for table `criteria_grades`
+--
+ALTER TABLE `criteria_grades`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `criteria_note_records`
+--
+ALTER TABLE `criteria_note_records`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `grading_criteria`
@@ -540,6 +624,12 @@ ALTER TABLE `teacher_subjects`
   ADD KEY `subject_id` (`subject_id`);
 
 --
+-- Indexes for table `teacher_subject_enrollees`
+--
+ALTER TABLE `teacher_subject_enrollees`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `web_users`
 --
 ALTER TABLE `web_users`
@@ -553,13 +643,25 @@ ALTER TABLE `web_users`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `a_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `a_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `criteria_grades`
+--
+ALTER TABLE `criteria_grades`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `criteria_note_records`
+--
+ALTER TABLE `criteria_note_records`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `grading_criteria`
@@ -589,7 +691,7 @@ ALTER TABLE `student_missing_requirements`
 -- AUTO_INCREMENT for table `student_users`
 --
 ALTER TABLE `student_users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `subjects`
@@ -608,6 +710,12 @@ ALTER TABLE `teachers`
 --
 ALTER TABLE `teacher_subjects`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+
+--
+-- AUTO_INCREMENT for table `teacher_subject_enrollees`
+--
+ALTER TABLE `teacher_subject_enrollees`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `web_users`
