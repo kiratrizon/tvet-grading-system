@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         'name' => $name,
         'course_id' => $course_id
     ]);
-    if (!$result['status']){
+    if (!$result['status']) {
         $_SESSION['error'] = $result['message'] ?? 'An error occurred while adding the student.';
     } else {
         $_SESSION['success'] = $result['message'] ?? 'Student added successfully.';
@@ -77,65 +77,70 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <p class="loading-text">Please wait... Processing your request</p>
         </div>
         <main class="main">
-        <div class="main-wrapper container py-4">
-            <h2 class="text-center fw-bold text-uppercase mb-4">Add Student</h2>
+            <div class="main-wrapper container py-4">
+                <h2 class="text-center fw-bold text-uppercase mb-4">Add Student</h2>
 
-            <?php if (isset($_SESSION['error'])): ?>
-                <div class="text-center alert alert-danger alert-dismissible fade show" role="alert">
-                    <strong>Warning!</strong> <br> <?= $_SESSION['error'] ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <?php unset($_SESSION['error']); ?>
-            <?php endif; ?>
+                <?php if (isset($_SESSION['error'])): ?>
+                    <div class="text-center alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Warning!</strong> <br> <?= $_SESSION['error'] ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['error']); ?>
+                <?php endif; ?>
 
-            <?php if (isset($_SESSION['success'])): ?>
-                <div class="text-center alert alert-success alert-dismissible fade show" role="alert">
-                    <strong>Success!</strong> <br> <?= $_SESSION['success'] ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <?php unset($_SESSION['success']); ?>
-            <?php endif; ?>
+                <?php if (isset($_SESSION['success'])): ?>
+                    <div class="text-center alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Success!</strong> <br> <?= $_SESSION['success'] ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['success']); ?>
+                <?php endif; ?>
 
-            <form id="addStudentForm" class="mx-auto" style="max-width: 700px;" method="POST">
-            
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="name" class="form-label">Student Name</label>
-                        <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Juan Dela Cruz" required value="<?= $_SESSION['old_values']['name'] ?? '' ?>">
+                <form id="addStudentForm" class="mx-auto" style="max-width: 700px;" method="POST">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="name" class="form-label">Student Name</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="e.g. Juan Dela Cruz" required value="<?= $_SESSION['old_values']['name'] ?? '' ?>">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="e.g. juan@example.com" required value="<?= $_SESSION['old_values']['email'] ?? '' ?>">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="course" class="form-label">Diploma Program</label>
+                            <select name="course" id="course" class="form-select" required>
+                                <option selected disabled>Select Program</option>
+                                <?php foreach ($courses as $course) : ?>
+                                    <option value="<?php echo htmlspecialchars($course['id']); ?>" <?= (isset($_SESSION['old_values']['course_id']) && $_SESSION['old_values']['course_id'] == $course['id']) ? 'selected' : '' ?>>
+                                        <?php echo htmlspecialchars($course['course_name']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" placeholder="e.g. juan@example.com" required value="<?= $_SESSION['old_values']['email'] ?? '' ?>">
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Save Record</button>
                     </div>
+                </form>
 
-                    <div class="col-md-6">
-                        <label for="course" class="form-label">Diploma Program</label>
-                        <select name="course" id="course" class="form-select" required>
-                            <option selected disabled>Select Program</option>
-                            <?php foreach ($courses as $course) : ?>
-                                <option value="<?php echo htmlspecialchars($course['id']); ?>" <?= (isset($_SESSION['old_values']['course_id']) && $_SESSION['old_values']['course_id'] == $course['id']) ? 'selected' : '' ?>>
-                                    <?php echo htmlspecialchars($course['course_name']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                <!-- for excel import -->
+                <form action="import_students.php" method="post" enctype="multipart/form-data" class="mx-auto mt-5" style="max-width: 700px;">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Import Students (Excel/CSV)</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xls,.xlsx,.csv" required>
                     </div>
-                </div>
+                    <button type="submit" class="btn btn-primary">Import</button>
+                </form>
 
-                <div class="d-grid mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">Save Record</button>
+                <!-- download sample excel template -->
+                <div class="text-center mt-3">
+                    <a href="import_students_sample.php" class="btn btn-secondary" target="_blank">Download Sample Template</a>
                 </div>
-            </form>
-
-            <!-- for excel import -->
-            <form action="import_students.php" method="post" enctype="multipart/form-data" class="mx-auto mt-5" style="max-width: 700px;">
-                <div class="mb-3">
-                    <label for="file" class="form-label">Import Students (Excel/CSV)</label>
-                    <input type="file" class="form-control" id="file" name="file" accept=".xls,.xlsx,.csv" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Import</button>
-            </form>
-        </div>
+            </div>
         </main>
 
     </div>

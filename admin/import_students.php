@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
         // Remove header row
         array_shift($data);
         // map and trim
-        $data = array_map(function($row) {
+        $data = array_map(function ($row) {
             return array_map('trim', $row);
         }, $data);
 

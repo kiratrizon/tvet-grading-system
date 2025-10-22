@@ -49,10 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
 
-    // header row is enrolee_id, student_name, grade_score (fractional number)
+    // header row is enrolee_id, student_name, grade_score
     $sheet->setCellValue('A1', 'enrollee_id');
     $sheet->setCellValue('B1', 'student_name');
-    $sheet->setCellValue('C1', 'grade_score (fractional number)');
+    $sheet->setCellValue('C1', 'grade_score');
     // Fill data except Column C
 
     $rowNum = 2;

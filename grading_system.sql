@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Oct 22, 2025 at 10:07 AM
+-- Generation Time: Oct 22, 2025 at 11:29 PM
 -- Server version: 8.0.43
 -- PHP Version: 8.3.26
 
@@ -29,10 +29,10 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `admin` (
   `a_id` int NOT NULL,
-  `a_name` text COLLATE utf8mb4_general_ci NOT NULL,
-  `a_user_name` text COLLATE utf8mb4_general_ci NOT NULL,
-  `a_password` text COLLATE utf8mb4_general_ci NOT NULL,
-  `a_image` text COLLATE utf8mb4_general_ci NOT NULL
+  `a_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `a_user_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `a_password` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `a_image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -51,8 +51,8 @@ INSERT INTO `admin` (`a_id`, `a_name`, `a_user_name`, `a_password`, `a_image`) V
 
 CREATE TABLE `courses` (
   `id` int NOT NULL,
-  `course_code` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
-  `course_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL
+  `course_code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -73,9 +73,8 @@ INSERT INTO `courses` (`id`, `course_code`, `course_name`) VALUES
 
 CREATE TABLE `criteria_grades` (
   `id` int NOT NULL,
-  `coverage` int NOT NULL,
   `criteria_note_record_id` int NOT NULL,
-  `score` varchar(255) NOT NULL,
+  `score` float NOT NULL,
   `enrollee_id` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -83,13 +82,13 @@ CREATE TABLE `criteria_grades` (
 -- Dumping data for table `criteria_grades`
 --
 
-INSERT INTO `criteria_grades` (`id`, `coverage`, `criteria_note_record_id`, `score`, `enrollee_id`) VALUES
-(1, 1, 1, '30/40', 1),
-(2, 1, 1, '25/40', 2),
-(3, 1, 1, '40/40', 3),
-(4, 1, 1, '10/40', 4),
-(5, 1, 1, '30/40', 5),
-(6, 1, 1, '20/40', 6);
+INSERT INTO `criteria_grades` (`id`, `criteria_note_record_id`, `score`, `enrollee_id`) VALUES
+(1, 1, 20, 1),
+(2, 1, 30, 2),
+(3, 1, 40, 3),
+(4, 1, 30, 4),
+(5, 1, 15, 5),
+(6, 1, 23, 6);
 
 -- --------------------------------------------------------
 
@@ -100,15 +99,17 @@ INSERT INTO `criteria_grades` (`id`, `coverage`, `criteria_note_record_id`, `sco
 CREATE TABLE `criteria_note_records` (
   `id` int NOT NULL,
   `grading_criterion_id` int NOT NULL,
-  `note` varchar(255) NOT NULL
+  `note` varchar(255) NOT NULL,
+  `period` int NOT NULL,
+  `total_item` int NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `criteria_note_records`
 --
 
-INSERT INTO `criteria_note_records` (`id`, `grading_criterion_id`, `note`) VALUES
-(1, 66, 'Quiz #1');
+INSERT INTO `criteria_note_records` (`id`, `grading_criterion_id`, `note`, `period`, `total_item`) VALUES
+(1, 66, 'Quiz #1', 1, 40);
 
 -- --------------------------------------------------------
 
@@ -144,18 +145,18 @@ INSERT INTO `grading_criteria` (`id`, `teacher_subject_id`, `criteria_name`, `pe
 CREATE TABLE `student_grades` (
   `id` int NOT NULL,
   `student_id` int NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `course` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `year_level` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `semester` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `school_year` varchar(120) COLLATE utf8mb4_general_ci NOT NULL,
-  `course_code` varchar(150) COLLATE utf8mb4_general_ci NOT NULL,
-  `descriptive_title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `course` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `year_level` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `semester` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `school_year` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `course_code` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `descriptive_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `final_rating` decimal(3,1) NOT NULL,
-  `remarks` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `remarks` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `teacher_id` int NOT NULL,
   `subject_id` int NOT NULL,
-  `section` text COLLATE utf8mb4_general_ci NOT NULL
+  `section` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -200,11 +201,11 @@ CREATE TABLE `student_missing_requirements` (
   `id` int NOT NULL,
   `student_id` int NOT NULL,
   `subject_id` int NOT NULL,
-  `missing_requirement` text COLLATE utf8mb4_general_ci NOT NULL,
+  `missing_requirement` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `flagged_by_teacher` int NOT NULL,
   `flagged_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `studid` int NOT NULL,
-  `remarks` text COLLATE utf8mb4_general_ci NOT NULL
+  `remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -215,11 +216,11 @@ CREATE TABLE `student_missing_requirements` (
 
 CREATE TABLE `student_users` (
   `id` int NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `course` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `s_image` text COLLATE utf8mb4_general_ci
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `course` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -249,17 +250,17 @@ INSERT INTO `student_users` (`id`, `name`, `course`, `email`, `password`, `s_ima
 
 CREATE TABLE `subjects` (
   `s_id` int NOT NULL,
-  `s_semester` text COLLATE utf8mb4_general_ci NOT NULL,
-  `s_course_code` text COLLATE utf8mb4_general_ci NOT NULL,
-  `s_descriptive_title` text COLLATE utf8mb4_general_ci NOT NULL,
-  `s_nth` text COLLATE utf8mb4_general_ci NOT NULL,
-  `s_units` text COLLATE utf8mb4_general_ci NOT NULL,
-  `s_lee` text COLLATE utf8mb4_general_ci NOT NULL,
+  `s_semester` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_course_code` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_descriptive_title` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_nth` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_units` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_lee` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `s_lab` int NOT NULL DEFAULT '0',
-  `s_covered_qualification` text COLLATE utf8mb4_general_ci NOT NULL,
-  `s_pre_requisite` text COLLATE utf8mb4_general_ci NOT NULL,
-  `s_year_level` text COLLATE utf8mb4_general_ci NOT NULL,
-  `s_course` text COLLATE utf8mb4_general_ci NOT NULL
+  `s_covered_qualification` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_pre_requisite` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_year_level` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_course` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -419,12 +420,12 @@ INSERT INTO `subjects` (`s_id`, `s_semester`, `s_course_code`, `s_descriptive_ti
 
 CREATE TABLE `teachers` (
   `t_id` int NOT NULL,
-  `t_name` text COLLATE utf8mb4_general_ci NOT NULL,
-  `t_user_name` text COLLATE utf8mb4_general_ci NOT NULL,
-  `t_password` text COLLATE utf8mb4_general_ci NOT NULL,
-  `t_gender` text COLLATE utf8mb4_general_ci NOT NULL,
+  `t_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `t_user_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `t_password` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `t_gender` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` int NOT NULL DEFAULT '0',
-  `t_image` text COLLATE utf8mb4_general_ci NOT NULL
+  `t_image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -448,13 +449,13 @@ CREATE TABLE `teacher_subjects` (
   `id` int NOT NULL,
   `teacher_id` int NOT NULL,
   `subject_id` int NOT NULL,
-  `course` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `section` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
-  `year_level` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `semester` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `school_year` text COLLATE utf8mb4_general_ci NOT NULL,
-  `assigned_date` text COLLATE utf8mb4_general_ci NOT NULL,
-  `schedule_day` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `course` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `section` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `year_level` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `semester` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `school_year` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `assigned_date` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `schedule_day` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `schedule_time_start` time NOT NULL,
   `schedule_time_end` time NOT NULL,
   `room_id` int DEFAULT NULL,
@@ -465,20 +466,20 @@ CREATE TABLE `teacher_subjects` (
   `f` int DEFAULT NULL,
   `s` int DEFAULT NULL,
   `ss` int DEFAULT NULL,
-  `m_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `t_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `w_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `th_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `f_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `s_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `ss_start` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `m_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `t_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `w_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `th_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `f_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `s_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `ss_end` varchar(255) COLLATE utf8mb4_general_ci NOT NULL
+  `m_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `t_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `w_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `th_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `f_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `s_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ss_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `m_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `t_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `w_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `th_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `f_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `s_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `ss_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -527,8 +528,8 @@ INSERT INTO `teacher_subject_enrollees` (`id`, `student_id`, `teacher_subject_id
 
 CREATE TABLE `web_users` (
   `web_id` int NOT NULL,
-  `email` text COLLATE utf8mb4_general_ci NOT NULL,
-  `usertype` text COLLATE utf8mb4_general_ci NOT NULL
+  `email` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `usertype` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --

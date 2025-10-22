@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
         $data = $sheet->toArray();
 
         // Expected Headers
-        $expectedHeaders = ['id'];
+        $expectedHeaders = ['student_id'];
 
         if ($data[0] !== $expectedHeaders) {
             $_SESSION['error'] = "Invalid file format. Please use the correct template.";

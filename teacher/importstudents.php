@@ -62,31 +62,6 @@ $subject_id = $teacherSubjectDetails['subject_id'];
 $course_id = $teacherSubjectDetails['course'];
 $section = '';
 
-
-// $subject_code = isset($_GET['subject']) ? urldecode($_GET['subject']) : '';
-// $descriptiveTitle = isset($_GET['title']) ? urldecode($_GET['title']) : '';
-// $course = isset($_GET['course']) ? urldecode($_GET['course']) : '';
-// $year_level = isset($_GET['year']) ? urldecode($_GET['year']) : '';
-// $semester = isset($_GET['semester']) ? urldecode($_GET['semester']) : '';
-// $school_year = isset($_GET['school_year']) ? urldecode($_GET['school_year']) : '';
-// $subject_id = isset($_GET['subject_id']) ? urldecode($_GET['subject_id']) : '';
-// $course_id = isset($_GET['course_id']) ? urldecode($_GET['course_id']) : '';
-// $section = isset($_GET['section']) ? urldecode($_GET['section']) : '';
-
-
-
-// echo "Subject Code: " . $subject_code . "<br>";
-// echo "Title: " . $descriptiveTitle . "<br>";
-// echo "Course: " . $course . "<br>";
-// echo "Year Level: " . $year_level . "<br>";
-// echo "Semester: " . $semester . "<br>";
-// echo "School Year: " . $school_year . "<br>";
-
-// exit;
-
-
-// load students enrolled in the subject
-
 $students = myTools::getStudentsByTeacherSubject(['teacher_subject_id' => $teacherSubject, 'conn' => $conn]);
 
 
@@ -154,7 +129,7 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                     <h1 style="font-size: 24px; font-weight:900; line-height:1;">Students Enrolled in <?= $course ?></h1>
                     <h5 style="font-size: 16px; line-height:1"><?= htmlspecialchars($subject_code); ?> - <?= htmlspecialchars($descriptiveTitle); ?></h5>
                 </div>
-                
+
                 <!-- <button
                     type="button"
                     class="btn btn-primary"
@@ -171,13 +146,17 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                         <input type="hidden" name="teacher_subject" value="<?= $teacherSubject ?>">
                         <div class="d-flex flex-row gap-4">
                             <input type="file" name="file" accept=".xls,.xlsx,.csv" required class="form-control">
+                            <!-- Import Button -->
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="fa-solid fa-file-import"></i> Import Students for this Course
                             </button>
                         </div>
                     </form>
+                    <a href="enroll_students_sample.php" class="btn btn-secondary" target="_blank">
+                        <i class="fa-solid fa-download"></i> Download Template
+                    </a>
                 </div>
-                <!-- Import Button -->
+
                 <hr>
                 <div class="mt-4">
                     <form action="export_excel_student_for_grading.php" method="post" target="_new">
@@ -266,39 +245,37 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                     <div id="gradesTable" class="mt-3" style="display: none;">
                         <ul class="nav nav-tabs" id="gradeTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="prelim-tab" data-bs-toggle="tab" data-bs-target="#prelim" type="button" role="tab">Prelim</button>
+                                <button class="nav-link active" id="prelim-tab" data-bs-toggle="tab" data-bs-target="#prelim" type="button" role="tab">Prelim</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="midterm-tab" data-bs-toggle="tab" data-bs-target="#midterm" type="button" role="tab">Midterm</button>
+                                <button class="nav-link" id="midterm-tab" data-bs-toggle="tab" data-bs-target="#midterm" type="button" role="tab">Midterm</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="finals-tab" data-bs-toggle="tab" data-bs-target="#finals" type="button" role="tab">Finals</button>
+                                <button class="nav-link" id="finals-tab" data-bs-toggle="tab" data-bs-target="#finals" type="button" role="tab">Finals</button>
                             </li>
                         </ul>
 
                         <div class="tab-content mt-3" id="gradeTabsContent">
                             <?php foreach ($coverage as $key => $label): ?>
-                                <div 
-                                    class="tab-pane fade<?= $key == 1 ? ' show active' : '' ?>" 
-                                    id="<?= strtolower($label) ?>" 
-                                    role="tabpanel"
-                                >
+                                <div
+                                    class="tab-pane fade<?= $key == 1 ? ' show active' : '' ?>"
+                                    id="<?= strtolower($label) ?>"
+                                    role="tabpanel">
                                     <h5 class="mt-3"><?= htmlspecialchars($label) ?> Period</h5>
 
                                     <!-- Criteria Nav Tabs -->
                                     <ul class="nav nav-tabs mt-2" id="criteriaTabs-<?= strtolower($label) ?>" role="tablist">
                                         <?php foreach ($criteria as $index => $criterion): ?>
                                             <li class="nav-item" role="presentation">
-                                                <button 
-                                                    class="nav-link criteria-tab<?= $index == 0 ? ' active' : '' ?>" 
-                                                    id="criteria-<?= $criterion['id'] ?>-tab-<?= strtolower($label) ?>" 
-                                                    data-bs-toggle="tab" 
-                                                    data-bs-target="#criteria-<?= $criterion['id'] ?>-<?= strtolower($label) ?>" 
-                                                    type="button" 
+                                                <button
+                                                    class="nav-link criteria-tab<?= $index == 0 ? ' active' : '' ?>"
+                                                    id="criteria-<?= $criterion['id'] ?>-tab-<?= strtolower($label) ?>"
+                                                    data-bs-toggle="tab"
+                                                    data-bs-target="#criteria-<?= $criterion['id'] ?>-<?= strtolower($label) ?>"
+                                                    type="button"
                                                     role="tab"
                                                     data-id="<?= $criterion['id'] ?>"
-                                                    data-period="<?= strtolower($label) ?>"
-                                                >
+                                                    data-period="<?= strtolower($key) ?>">
                                                     <?= htmlspecialchars($criterion['criteria_name']) ?> (<?= htmlspecialchars($criterion['percentage']) ?>%)
                                                 </button>
                                             </li>
@@ -308,12 +285,11 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                                     <!-- Criteria Content Panes -->
                                     <div class="tab-content mt-3" id="criteriaTabsContent-<?= strtolower($label) ?>">
                                         <?php foreach ($criteria as $index => $criterion): ?>
-                                            <div 
-                                                class="tab-pane fade<?= $index == 0 ? ' show active' : '' ?>" 
-                                                id="criteria-<?= $criterion['id'] ?>-<?= strtolower($label) ?>" 
-                                                role="tabpanel"
-                                            >
-                                                
+                                            <div
+                                                class="tab-pane fade<?= $index == 0 ? ' show active' : '' ?>"
+                                                id="criteria-<?= $criterion['id'] ?>-<?= strtolower($label) ?>"
+                                                role="tabpanel">
+
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
@@ -579,34 +555,40 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                <form id="gradesForm" enctype="multipart/form-data" method="post" action="insert_grades.php">
-                    <input type="hidden" name="criterion_id" id="criterion_id">
-                    <input type="hidden" name="teacher_subject_id" value="<?= htmlspecialchars($teacherSubject) ?>">
-                    <input type="hidden" name="from_nav" value="2">
+                    <form id="gradesForm" enctype="multipart/form-data" method="post" action="insert_grades.php">
+                        <input type="hidden" name="criterion_id" id="criterion_id">
+                        <input type="hidden" name="teacher_subject_id" value="<?= htmlspecialchars($teacherSubject) ?>">
+                        <input type="hidden" name="from_nav" value="2">
 
-                    <div class="mb-3">
-                        <label for="note-criteria" class="form-label">Note</label>
-                        <input type="text" class="form-control" id="note-criteria" name="note_criteria" required placeholder="e.g. Quiz #1">
-                    </div>
+                        <div class="mb-3">
+                            <label for="note-criteria" class="form-label">Note</label>
+                            <input type="text" class="form-control" id="note-criteria" name="note_criteria" required placeholder="e.g. Quiz #1">
+                        </div>
 
-                    <!-- covered for prelim, midterm, and finals -->
-                    <div class="mb-3">
-                        <label for="covered" class="form-label">Coverage (e.g., Prelim, Midterm, Finals)</label>
-                        <select name="covered" id="covered" class="form-select" required>
-                            <option value="" disabled selected>---</option>
-                            <option value="1">Prelim</option>
-                            <option value="2">Midterm</option>
-                            <option value="3">Finals</option>
-                        </select>
+                        <!-- covered for prelim, midterm, and finals -->
+                        <div class="mb-3">
+                            <label for="covered" class="form-label">Coverage (e.g., Prelim, Midterm, Finals)</label>
+                            <select name="covered" id="covered" class="form-select" required>
+                                <option value="" disabled selected>---</option>
+                                <option value="1">Prelim</option>
+                                <option value="2">Midterm</option>
+                                <option value="3">Finals</option>
+                            </select>
 
-                    </div>
+                        </div>
 
-                    <!-- excel upload -->
-                    <div class="mb-3">
-                        <label for="gradesFile" class="form-label">Upload Grades File (Excel or CSV)</label>
-                        <input type="file" class="form-control" id="gradesFile" name="grades_file" accept=".xls,.xlsx,.csv" required>
-                    </div>
-                </form>
+                        <!-- out of or total items -->
+                        <div class="mb-3">
+                            <label for="total_items" class="form-label">Total Items</label>
+                            <input type="number" class="form-control" id="total_items" name="total_items" required placeholder="e.g. 100">
+                        </div>
+
+                        <!-- excel upload -->
+                        <div class="mb-3">
+                            <label for="gradesFile" class="form-label">Upload Grades File (Excel or CSV)</label>
+                            <input type="file" class="form-control" id="gradesFile" name="grades_file" accept=".xls,.xlsx,.csv" required>
+                        </div>
+                    </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -693,7 +675,7 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
             $(".add-grades").click(function() {
                 const criterionId = $(this).val();
                 $("#criterion_id").val(criterionId); // put value in hidden input
-                $("#addGradesModal").modal("show");  // show Bootstrap modal
+                $("#addGradesModal").modal("show"); // show Bootstrap modal
             });
 
             document.getElementById("rating").addEventListener("input", function() {
@@ -746,7 +728,7 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
             });
 
             $(document).on('shown.bs.tab', '[data-bs-target^="#"]', function(e) {
-                const periodPane = $( $(this).data('bs-target') ); // e.g. #prelim
+                const periodPane = $($(this).data('bs-target')); // e.g. #prelim
                 const firstCriteriaTab = periodPane.find('.criteria-tab').first();
 
                 // Trigger click on first criteria inside the selected period
@@ -759,25 +741,26 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                 const criterionId = $(this).data('id');
                 const period = $(this).data('period');
                 const target = $(this).data('bs-target'); // tab-pane selector
+                const teacherSubject = <?= json_encode($teacherSubject); ?>;
 
                 // Show loading state
                 $(target).html('<div class="text-center py-3">Loading...</div>');
 
                 // AJAX request
-                // $.ajax({
-                //     url: 'fetch_grades.php',
-                //     type: 'POST',
-                //     data: {
-                //         criterion_id: criterionId,
-                //         period: period
-                //     },
-                //     success: function(response) {
-                //         $(target).html(response);
-                //     },
-                //     error: function() {
-                //         $(target).html('<div class="text-danger text-center py-3">Error loading data.</div>');
-                //     }
-                // });
+                $.ajax({
+                    url: 'fetch_grades.php',
+                    type: 'POST',
+                    data: {
+                        criterion_id: criterionId,
+                        period: period
+                    },
+                    success: function(response) {
+                        $(target).html(response);
+                    },
+                    error: function() {
+                        $(target).html('<div class="text-danger text-center py-3">Error loading data.</div>');
+                    }
+                });
             });
 
         })
