@@ -30,7 +30,8 @@ $image = $row['s_image'];
             </div>
             <div class="profile-name">
                 <h6 style="font-size: 12px; line-height: 1; margin-bottom:4px" class="text-white"><?= $name; ?></h6>
-                <h6 style="font-size: 10px; line-height: 1; margin:0" class="text-white"><em>Student</em></h6>
+                <h6 style="font-size: 10px; line-height: 1; margin:0; margin-bottom:4px" class="text-white"><em>Student</em></h6>
+                <h6 style="font-size: 10px; line-height: 1; margin:0" class="text-white"><em>ID: <?= $id; ?></em></h6>
             </div>
         </div>
     </div>

@@ -18,13 +18,16 @@ if (isset($_SESSION['user'])) {
     exit;
 }
 
-
+$fromNav = $_SESSION['from_nav'] ?? 1;
+unset($_SESSION['from_nav']);
 
 $teacherSubject = $_GET['teacher_subject'] ?? '';
 if (empty($teacherSubject)) {
     header("location: mysubjects.php");
     exit;
 }
+
+$coverage = ['1' => 'Prelim', '2' => 'Midterm', '3' => 'Finals'];
 
 // $subjects = $conn->query("SELECT id, name, final_rating, remarks, student_id 
 //                        FROM student_grades 
@@ -80,6 +83,20 @@ $section = '';
 // echo "School Year: " . $school_year . "<br>";
 
 // exit;
+
+
+// load students enrolled in the subject
+
+$students = myTools::getStudentsByTeacherSubject(['teacher_subject_id' => $teacherSubject, 'conn' => $conn]);
+
+
+
+// update all students to read flg 1 in teacher_subject_enrollees
+$conn->query("UPDATE teacher_subject_enrollees SET read_flg = 1 WHERE teacher_subject_id = '$teacherSubject'");
+
+$criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_id = '$teacherSubject'")->fetch_all(MYSQLI_ASSOC);
+
+// myTools::display(($criteria));exit;
 ?>
 
 <!DOCTYPE html>
@@ -117,41 +134,45 @@ $section = '';
             <div class="main-wrapper" style="padding: 4%;">
                 <!-- Modal trigger button -->
 
+                <?php if (isset($_SESSION['error'])): ?>
+                    <div class="text-center alert alert-danger alert-dismissible fade show" role="alert">
+                        <strong>Warning!</strong> <br> <?= $_SESSION['error'] ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['error']); ?>
+                <?php endif; ?>
+
+                <?php if (isset($_SESSION['success'])): ?>
+                    <div class="text-center alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Success!</strong> <br> <?= $_SESSION['success'] ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <?php unset($_SESSION['success']); ?>
+                <?php endif; ?>
                 <div class="headings text-center mb-5">
                     <h4 style="font-size: 16px; line-height:1"><?= $year_level ?> <br> <?= $semester ?> <?= $school_year ?></h4>
                     <h1 style="font-size: 24px; font-weight:900; line-height:1;">Students Enrolled in <?= $course ?></h1>
                     <h5 style="font-size: 16px; line-height:1"><?= htmlspecialchars($subject_code); ?> - <?= htmlspecialchars($descriptiveTitle); ?></h5>
                 </div>
-
-                <button
+                
+                <!-- <button
                     type="button"
                     class="btn btn-primary"
                     data-bs-toggle="modal"
                     data-bs-target="#addStudent">
                     <i class="fa fa-plus-circle"></i> Add Student Grade
-                </button>
+                </button> -->
                 <hr>
                 <div class="import d-flex flex-row gap-5 mb-4">
                     <a href="mysubjects.php" class="btn btn-primary" style="border-radius: 50px;">
                         <i class="fa-solid fa-arrow-left"></i> Back
                     </a>
-                    <form action="import_excel_grades.php" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="teacher_id" value="<?= htmlspecialchars($_SESSION['teacher_id']) ?>">
-                        <input type="hidden" name="subject_code" value="<?= htmlspecialchars($subject_code) ?>">
-                        <input type="hidden" name="course" value="<?= htmlspecialchars($course ?? '') ?>">
-                        <input type="hidden" name="year_level" value="<?= htmlspecialchars($year_level ?? '') ?>">
-                        <input type="hidden" name="semester" value="<?= htmlspecialchars($semester ?? '') ?>">
-                        <input type="hidden" name="school_year" value="<?= htmlspecialchars($school_year ?? '') ?>">
-                        <input type="hidden" name="descriptive_title" value="<?= htmlspecialchars($descriptiveTitle ?? '') ?>">
-                        <input type="hidden" name="subject_id" value="<?= $subject_id ?>">
-                        <input type="hidden" name="course_id" value="<?= $course_id ?>">
-                        <input type="hidden" name="section" value="<?= $section ?>">
-
-
+                    <form action="enroll_students.php" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="teacher_subject" value="<?= $teacherSubject ?>">
                         <div class="d-flex flex-row gap-4">
                             <input type="file" name="file" accept=".xls,.xlsx,.csv" required class="form-control">
-                            <button type="submit" class="btn btn-primary w-50">
-                                <i class="fa-solid fa-file-import"></i> Import Students
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fa-solid fa-file-import"></i> Import Students for this Course
                             </button>
                         </div>
                     </form>
@@ -159,71 +180,151 @@ $section = '';
                 <!-- Import Button -->
                 <hr>
                 <div class="mt-4">
-                    <form action="print_subject.php" method="post" target="_new">
-                        <input type="hidden" id="teacher_id" name="teacher_id" value="<?= $_SESSION['teacher_id'] ?>">
-                        <input type="hidden" name="course" value="<?= $course ?>">
-                        <input type="hidden" name="year_level" value="<?= $year_level ?>">
-                        <input type="hidden" name="semester" value="<?= $semester ?>">
-                        <input type="hidden" name="school_year" value="<?= $school_year ?>">
-                        <input type="hidden" name="descriptive_title" value="<?= $descriptiveTitle ?>">
-                        <input type="hidden" name="subject_id" value="<?= $subject_id ?>">
-                        <input type="hidden" name="course_id" value="<?= $course_id ?>">
-                        <input type="hidden" name="section" value="<?= $section ?>">
-
+                    <form action="export_excel_student_for_grading.php" method="post" target="_new">
                         <div class="d-flex flex-row gap-4 align-items-center mb-3">
-
+                            <input type="hidden" name="teacher_subject" value="<?= $teacherSubject ?>">
                             <button type="submit" class="btn btn-success" name="print_data">
-                                <i class="fas fa-print" style="font-size: 12px;"></i> Print
+                                <i class="fas fa-print" style="font-size: 12px;"></i> Export Students for Grading
                             </button>
                         </div>
                     </form>
-
-                    <table id="teacherTable" class="display nowrap table table-bordered mt-3">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>No.</th>
-                                <th><i class="fa-solid fa-user"></i> Students Name</th>
-                                <th class="text-center"><i class="fa-solid fa-star"></i> Final Rating</th>
-                                <th class="text-center"><i class="fa-solid fa-comment"></i> Remarks</th>
-                                <th class="text-center"><i class="fa-solid fa-cogs"></i> Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($subjects as $subject): ?>
+                    <!-- tab -->
+                    <ul class="nav nav-tabs mb-3">
+                        <li class="nav-item">
+                            <a id="navStudents" class="nav-link active" href="#">Student List</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="navAddGrades" class="nav-link" href="#">Add Grades</a>
+                        </li>
+                        <li class="nav-item">
+                            <a id="navGrades" class="nav-link" href="#">Show Grades</a>
+                        </li>
+                    </ul>
+                    <div id="studentsTable">
+                        <table id="teacherTable" class="display nowrap table table-bordered mt-3">
+                            <thead class="table-dark">
                                 <tr>
-                                    <td><?= $row_count; ?></td>
-                                    <td><?= htmlspecialchars($subject['name']); ?></td>
-                                    <td class="text-center"><?= htmlspecialchars($subject['final_rating']); ?></td>
-                                    <td class="text-center <?php
-                                                            if ($subject['remarks'] === 'Incomplete') {
-                                                                echo 'text-warning';
-                                                            } elseif ($subject['remarks'] === 'Failed') {
-                                                                echo 'text-danger';
-                                                            } else {
-                                                                echo 'text-success';
-                                                            } ?>">
-                                        <?= htmlspecialchars($subject['remarks']); ?>
-                                    </td>
-
-                                    <td>
-                                        <div class="action">
-                                            <button type="submit" class="btn btn-primary update" data-bs-toggle="modal" data-bs-target="#editGrades" value="<?= $subject['id'] ?>">
-                                                <i class="fa-solid fa-pencil-alt"></i>
-                                            </button>
-                                            <button type="submit" class="btn btn-warning view" data-bs-toggle="modal" data-bs-target="#viewGrades" value="<?= $subject['id'] ?>">
-                                                <i class="fa-solid fa-eye"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-danger flag-lr" data-bs-toggle="modal" data-bs-target="#flagLRModal" data-student-id="<?= $subject['id'] ?>" data-subject-id="<?= $subject_id ?>" data-studid="<?= $subject['student_id'] ?>" data-studremarks="<?= $subject['remarks'] ?>"
-                                                <?= ($subject['remarks'] === 'Passed') ? 'disabled' : ''; ?>>
-                                                <i class="fa-solid fa-flag"></i>
-                                            </button>
-                                        </div>
-                                    </td>
+                                    <th class="text-start">Enrollee ID</th>
+                                    <th><i class="fa-solid fa-user"></i> Name</th>
+                                    <th class="text-center"><i class="fa-solid fa-cogs"></i> Action</th>
                                 </tr>
-                            <?php $row_count++;
-                            endforeach ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($students as $student): ?>
+                                    <tr>
+                                        <td class="text-start"><?= $student['id']; ?></td>
+                                        <td><?= $student['student_name']; ?> <?= !$student['read_flg'] ? '<span class="text-danger">(New)</span>' : '' ?></td>
+                                        <td>
+                                            <div class="action">
+                                                <button type="submit" class="btn btn-primary update" data-bs-toggle="modal" data-bs-target="#editGrades">
+                                                    <i class="fa-solid fa-pencil-alt"></i>
+                                                </button>
+                                                <button type="submit" class="btn btn-warning view" data-bs-toggle="modal" data-bs-target="#viewGrades">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-danger flag-lr" data-bs-toggle="modal" data-bs-target="#flagLRModal" data-student-id="" data-subject-id="" data-studid="" data-studremarks="">
+                                                    <i class="fa-solid fa-flag"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php $row_count++;
+                                endforeach ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="addGradesArea" class="mt-3" style="display: none;">
+                        <!-- Grading Criteria -->
+                        <h4>Grading Criteria</h4>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Criteria</th>
+                                    <th>Percentage (%)</th>
+                                    <th>Options</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (!empty($criteria)): ?>
+                                    <?php foreach ($criteria as $criterion): ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($criterion['criteria_name']) ?></td>
+                                            <td><?= htmlspecialchars($criterion['percentage']) ?>%</td>
+                                            <td>
+                                                <button class="btn btn-primary add-grades" value="<?= htmlspecialchars($criterion['id']) ?>">Add Grades</button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="2" class="text-center text-danger">No grading criteria found.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="gradesTable" class="mt-3" style="display: none;">
+                        <ul class="nav nav-tabs" id="gradeTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="prelim-tab" data-bs-toggle="tab" data-bs-target="#prelim" type="button" role="tab">Prelim</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="midterm-tab" data-bs-toggle="tab" data-bs-target="#midterm" type="button" role="tab">Midterm</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="finals-tab" data-bs-toggle="tab" data-bs-target="#finals" type="button" role="tab">Finals</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content mt-3" id="gradeTabsContent">
+                            <?php foreach ($coverage as $key => $label): ?>
+                                <div 
+                                    class="tab-pane fade<?= $key == 1 ? ' show active' : '' ?>" 
+                                    id="<?= strtolower($label) ?>" 
+                                    role="tabpanel"
+                                >
+                                    <h5 class="mt-3"><?= htmlspecialchars($label) ?> Period</h5>
+
+                                    <!-- Criteria Nav Tabs -->
+                                    <ul class="nav nav-tabs mt-2" id="criteriaTabs-<?= strtolower($label) ?>" role="tablist">
+                                        <?php foreach ($criteria as $index => $criterion): ?>
+                                            <li class="nav-item" role="presentation">
+                                                <button 
+                                                    class="nav-link criteria-tab<?= $index == 0 ? ' active' : '' ?>" 
+                                                    id="criteria-<?= $criterion['id'] ?>-tab-<?= strtolower($label) ?>" 
+                                                    data-bs-toggle="tab" 
+                                                    data-bs-target="#criteria-<?= $criterion['id'] ?>-<?= strtolower($label) ?>" 
+                                                    type="button" 
+                                                    role="tab"
+                                                    data-id="<?= $criterion['id'] ?>"
+                                                    data-period="<?= strtolower($label) ?>"
+                                                >
+                                                    <?= htmlspecialchars($criterion['criteria_name']) ?> (<?= htmlspecialchars($criterion['percentage']) ?>%)
+                                                </button>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+
+                                    <!-- Criteria Content Panes -->
+                                    <div class="tab-content mt-3" id="criteriaTabsContent-<?= strtolower($label) ?>">
+                                        <?php foreach ($criteria as $index => $criterion): ?>
+                                            <div 
+                                                class="tab-pane fade<?= $index == 0 ? ' show active' : '' ?>" 
+                                                id="criteria-<?= $criterion['id'] ?>-<?= strtolower($label) ?>" 
+                                                role="tabpanel"
+                                            >
+                                                
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+
+
+                    </div>
+
+
                 </div>
             </div>
         </main>
@@ -469,6 +570,52 @@ $section = '';
     </div>
 
 
+    <!-- add grades modal -->
+    <div class="modal fade" id="addGradesModal" tabindex="-1" aria-labelledby="addGradesModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGradesModalLabel">Add Grades</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                <form id="gradesForm" enctype="multipart/form-data" method="post" action="insert_grades.php">
+                    <input type="hidden" name="criterion_id" id="criterion_id">
+                    <input type="hidden" name="teacher_subject_id" value="<?= htmlspecialchars($teacherSubject) ?>">
+                    <input type="hidden" name="from_nav" value="2">
+
+                    <div class="mb-3">
+                        <label for="note-criteria" class="form-label">Note</label>
+                        <input type="text" class="form-control" id="note-criteria" name="note_criteria" required placeholder="e.g. Quiz #1">
+                    </div>
+
+                    <!-- covered for prelim, midterm, and finals -->
+                    <div class="mb-3">
+                        <label for="covered" class="form-label">Coverage (e.g., Prelim, Midterm, Finals)</label>
+                        <select name="covered" id="covered" class="form-select" required>
+                            <option value="" disabled selected>---</option>
+                            <option value="1">Prelim</option>
+                            <option value="2">Midterm</option>
+                            <option value="3">Finals</option>
+                        </select>
+
+                    </div>
+
+                    <!-- excel upload -->
+                    <div class="mb-3">
+                        <label for="gradesFile" class="form-label">Upload Grades File (Excel or CSV)</label>
+                        <input type="file" class="form-control" id="gradesFile" name="grades_file" accept=".xls,.xlsx,.csv" required>
+                    </div>
+                </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" form="gradesForm">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="../public/js/loading.js"></script>
 
     <!-- Plugin sa Data Table -->
@@ -501,6 +648,53 @@ $section = '';
                 $("#studremarks").val(studremarks);
             });
 
+            $("#navStudents").click(function(e) {
+                e.preventDefault();
+                $("#studentsTable").show();
+                $("#addGradesArea").hide();
+                $("#gradesTable").hide();
+                $("#navStudents").addClass("active");
+                $("#navGrades").removeClass("active");
+                $("#navAddGrades").removeClass("active");
+            });
+
+            $("#navGrades").click(function(e) {
+                e.preventDefault();
+                $("#studentsTable").hide();
+                $("#addGradesArea").hide();
+                $("#gradesTable").show();
+                $("#navGrades").addClass("active");
+                $("#navStudents").removeClass("active");
+                $("#navAddGrades").removeClass("active");
+                // Optionally trigger the first criteria of the first period on initial load
+                const firstPeriodTab = $('.nav-link[data-bs-target="#prelim"]'); // adjust if needed
+                if (firstPeriodTab.length) {
+                    const targetPane = $(firstPeriodTab.data('bs-target'));
+                    const firstCriteriaTab = targetPane.find('.criteria-tab').first();
+                    if (firstCriteriaTab.length) firstCriteriaTab.trigger('click');
+                }
+            });
+            $("#navAddGrades").click(function(e) {
+                e.preventDefault();
+                $("#studentsTable").hide();
+                $("#addGradesArea").show();
+                $("#gradesTable").hide();
+                $("#navAddGrades").addClass("active");
+                $("#navStudents").removeClass("active");
+                $("#navGrades").removeClass("active");
+            });
+            const fromNav = <?= json_encode($fromNav); ?>;
+            if (fromNav == 2) {
+                $("#navAddGrades").trigger("click");
+            } else if (fromNav == 3) {
+                $("#navGrades").trigger("click");
+            }
+
+            $(".add-grades").click(function() {
+                const criterionId = $(this).val();
+                $("#criterion_id").val(criterionId); // put value in hidden input
+                $("#addGradesModal").modal("show");  // show Bootstrap modal
+            });
 
             document.getElementById("rating").addEventListener("input", function() {
                 let rating = parseFloat(this.value);
@@ -551,8 +745,40 @@ $section = '';
                 // }
             });
 
+            $(document).on('shown.bs.tab', '[data-bs-target^="#"]', function(e) {
+                const periodPane = $( $(this).data('bs-target') ); // e.g. #prelim
+                const firstCriteriaTab = periodPane.find('.criteria-tab').first();
 
+                // Trigger click on first criteria inside the selected period
+                if (firstCriteriaTab.length) {
+                    firstCriteriaTab.trigger('click');
+                }
+            });
 
+            $(document).on('click', '.criteria-tab', function() {
+                const criterionId = $(this).data('id');
+                const period = $(this).data('period');
+                const target = $(this).data('bs-target'); // tab-pane selector
+
+                // Show loading state
+                $(target).html('<div class="text-center py-3">Loading...</div>');
+
+                // AJAX request
+                // $.ajax({
+                //     url: 'fetch_grades.php',
+                //     type: 'POST',
+                //     data: {
+                //         criterion_id: criterionId,
+                //         period: period
+                //     },
+                //     success: function(response) {
+                //         $(target).html(response);
+                //     },
+                //     error: function() {
+                //         $(target).html('<div class="text-danger text-center py-3">Error loading data.</div>');
+                //     }
+                // });
+            });
 
         })
     </script>

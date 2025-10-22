@@ -88,7 +88,7 @@ $school_years = $conn->query("SELECT DISTINCT school_year FROM teacher_subjects 
     <script src="../public/js/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet" href="../public/fonts/css/all.min.css">
     <link rel="stylesheet" href="../public/style/loading.css">
-    <title>My Subjects</title>
+    <title>Program & Course</title>
     <style>
         [class*="add-criteria-"] i, [class*="edit-criteria-"] i {
             pointer-events: none;
@@ -135,13 +135,13 @@ $school_years = $conn->query("SELECT DISTINCT school_year FROM teacher_subjects 
                         <?php unset($_SESSION['updated']); ?>
                     <?php endif; ?>
                 </div>
-                <h3 class="mb-3">My Subjects</h3>
+                <h3 class="mb-3">Program & Course</h3>
 
                 <!-- Filters -->
                 <div class="row mb-4">
                     <div class="col-md-2">
                         <select id="filterCourse" class="form-control">
-                            <option value="">Select Course</option>
+                            <option value="">Select Program</option>
                             <?php while ($row = $courses->fetch_assoc()): ?>
                                 <option value="<?= $row['id'] ?>" <?= $course_filter == $row['id'] ? 'selected' : '' ?>><?= $row['course_name'] ?></option>
                             <?php endwhile; ?>

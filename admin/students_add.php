@@ -31,36 +31,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         header("location: students_add.php");
         exit;
     }
-    $getLastInsertedId = ($conn->query("SELECT MAX(id) AS last_id FROM student_users")->fetch_assoc()['last_id'] ?? 0) + 1;
-    $defaultPasswordUnhashed = 'student' . $getLastInsertedId;
-    $defaultPasswordHashed = password_hash($defaultPasswordUnhashed, PASSWORD_DEFAULT);
-    // before inserting, check if email already exists
-    $emailCheck = $conn->query("SELECT id from student_users WHERE email = '$email' limit 1");
-    if ($emailCheck->num_rows > 0) {
-        $_SESSION['error'] = "Email already exists. Please use a different email.";
+    $result = myTools::registerStudents([
+        'conn' => $conn,
+        'email' => $email,
+        'name' => $name,
+        'course_id' => $course_id
+    ]);
+    if (!$result['status']){
+        $_SESSION['error'] = $result['message'] ?? 'An error occurred while adding the student.';
     } else {
-        $stmt = $conn->prepare("INSERT INTO student_users (name, email, password, course) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("sssi", $name, $email, $defaultPasswordHashed, $course_id);
-        if ($stmt->execute()) {
-            // Send email with default password
-            $emailParams = [
-                'to' => $email,
-                'name' => $name,
-                'subject' => 'Your Student Account Details',
-                'body' => "<p>Dear $name,</p>
-                        <p>Your student account has been created successfully.</p>
-                        <p>Your default password is: <strong>$defaultPasswordUnhashed</strong></p>
-                        <p>Please log in and change your password immediately for security reasons.</p>
-                        <p>Best regards,<br>Grading System Team</p>"
-            ];
-            myTools::sendEmail($emailParams);
-            $_SESSION['success'] = "Student added successfully. An email has been sent to the student with their login details.";
-            unset($_SESSION['old_values']);
-        } else {
-            $_SESSION['error'] = "An error occurred while adding the student. Please try again.";
-        }
+        $_SESSION['success'] = $result['message'] ?? 'Student added successfully.';
+        unset($_SESSION['old_values']);
     }
-    $stmt->close();
     header("location: students_add.php");
     exit;
 }
@@ -83,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="../public/js/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet" href="../public/fonts/css/all.min.css">
     <link rel="stylesheet" href="../public/style/loading.css">
-    <title>Student Grades</title>
+    <title>Add Students</title>
 </head>
 
 <body>
@@ -128,9 +110,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
 
                     <div class="col-md-6">
-                        <label for="course" class="form-label">Course</label>
+                        <label for="course" class="form-label">Diploma Program</label>
                         <select name="course" id="course" class="form-select" required>
-                            <option selected disabled>Select Course</option>
+                            <option selected disabled>Select Program</option>
                             <?php foreach ($courses as $course) : ?>
                                 <option value="<?php echo htmlspecialchars($course['id']); ?>" <?= (isset($_SESSION['old_values']['course_id']) && $_SESSION['old_values']['course_id'] == $course['id']) ? 'selected' : '' ?>>
                                     <?php echo htmlspecialchars($course['course_name']); ?>
@@ -143,6 +125,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="d-grid mt-4">
                     <button type="submit" class="btn btn-primary btn-lg">Save Record</button>
                 </div>
+            </form>
+
+            <!-- for excel import -->
+            <form action="import_students.php" method="post" enctype="multipart/form-data" class="mx-auto mt-5" style="max-width: 700px;">
+                <div class="mb-3">
+                    <label for="file" class="form-label">Import Students (Excel/CSV)</label>
+                    <input type="file" class="form-control" id="file" name="file" accept=".xls,.xlsx,.csv" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Import</button>
             </form>
         </div>
         </main>

@@ -168,7 +168,7 @@ $existingCriteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_s
                                             value="<?= htmlspecialchars($criteria['percentage']) ?>" 
                                             required>
 
-                                        <button type="button" class="btn btn-danger remove-criteria">
+                                        <button type="button" class="btn btn-danger remove-criteria" value="<?= (int) $criteria['id'] ?>">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </div>
@@ -216,7 +216,28 @@ $existingCriteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_s
 
             // Remove a criteria row
             $(document).on('click', '.remove-criteria', function() {
-                $(this).closest('.criteria-item').remove();
+                if ($(this).val() != 0){
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "This criteria might be in use in existing student grades.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $(this).closest('.criteria-item').remove();
+                            Swal.fire(
+                                'Deleted!',
+                                'The criteria has been deleted.',
+                                'success'
+                            )
+                        }
+                    })
+                } else {
+                    $(this).closest('.criteria-item').remove();
+                }
             });
 
             // Optional: validate total = 100% before submit
