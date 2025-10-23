@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Oct 22, 2025 at 11:29 PM
+-- Generation Time: Oct 23, 2025 at 10:45 AM
 -- Server version: 8.0.43
 -- PHP Version: 8.3.26
 
@@ -83,12 +83,42 @@ CREATE TABLE `criteria_grades` (
 --
 
 INSERT INTO `criteria_grades` (`id`, `criteria_note_record_id`, `score`, `enrollee_id`) VALUES
-(1, 1, 20, 1),
+(1, 1, 25, 1),
 (2, 1, 30, 2),
 (3, 1, 40, 3),
 (4, 1, 30, 4),
-(5, 1, 15, 5),
-(6, 1, 23, 6);
+(5, 1, 30, 5),
+(6, 1, 25, 6),
+(7, 2, 25, 1),
+(8, 2, 30, 2),
+(9, 2, 40, 3),
+(10, 2, 30, 4),
+(11, 2, 40, 5),
+(12, 2, 30, 6),
+(13, 3, 1, 1),
+(14, 3, 1, 2),
+(15, 3, 1, 3),
+(16, 3, 1, 4),
+(17, 3, 1, 5),
+(18, 3, 1, 6),
+(19, 4, 45, 1),
+(20, 4, 30, 2),
+(21, 4, 40, 3),
+(22, 4, 40, 4),
+(23, 4, 40, 5),
+(24, 4, 40, 6),
+(25, 5, 30, 1),
+(26, 5, 30, 2),
+(27, 5, 40, 3),
+(28, 5, 35, 4),
+(29, 5, 30, 5),
+(30, 5, 35, 6),
+(31, 6, 30, 1),
+(32, 6, 30, 2),
+(33, 6, 40, 3),
+(34, 6, 30, 4),
+(35, 6, 15, 5),
+(36, 6, 23, 6);
 
 -- --------------------------------------------------------
 
@@ -109,7 +139,12 @@ CREATE TABLE `criteria_note_records` (
 --
 
 INSERT INTO `criteria_note_records` (`id`, `grading_criterion_id`, `note`, `period`, `total_item`) VALUES
-(1, 66, 'Quiz #1', 1, 40);
+(1, 66, 'Quiz #1', 1, 40),
+(2, 66, 'Quiz #2', 1, 50),
+(3, 68, 'Attendance', 1, 1),
+(4, 69, 'Exam', 1, 50),
+(5, 77, 'Oral', 1, 40),
+(6, 78, 'Projects', 1, 50);
 
 -- --------------------------------------------------------
 
@@ -656,13 +691,13 @@ ALTER TABLE `courses`
 -- AUTO_INCREMENT for table `criteria_grades`
 --
 ALTER TABLE `criteria_grades`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `criteria_note_records`
 --
 ALTER TABLE `criteria_note_records`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `grading_criteria`

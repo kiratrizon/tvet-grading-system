@@ -202,4 +202,101 @@ class myTools
         $writer->save('php://output');
         return true;
     }
+
+    public static function getEnrolleeAllGradesByCriteriaAndPeriod($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $criteria_id = $params['criteria_id'] ?? null;
+        $period = $params['period'] ?? null;
+        $enrollee_id = $params['enrollee_id'] ?? null;
+
+        if (!$conn || !($conn instanceof mysqli)) {
+            return null;
+        }
+        if (empty($criteria_id) || empty($period) || empty($enrollee_id)) {
+            return null;
+        }
+
+        $queryTotalScore = "SELECT sum(cg.score) as total_score FROM criteria_grades cg JOIN criteria_note_records cnr ON cg.criteria_note_record_id = cnr.id WHERE cg.enrollee_id = '$enrollee_id' AND cnr.grading_criterion_id = '$criteria_id' AND cnr.period = '$period'";
+
+        // total score for the enrollee in that criterion
+        $totalScoreData = $conn->query($queryTotalScore)->fetch_assoc();
+        $totalScore = $totalScoreData['total_score'] ?? 0;
+
+        return $totalScore;
+    }
+
+    public static function getTotalItemByCriteriaAndPeriod($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $criteria_id = $params['criteria_id'] ?? null;
+        $period = $params['period'] ?? null;
+
+        if (!$conn || !($conn instanceof mysqli)) {
+            return null;
+        }
+        if (empty($criteria_id) || empty($period)) {
+            return null;
+        }
+        $totalItem = $conn->query("SELECT SUM(total_item) as total_items FROM criteria_note_records WHERE grading_criterion_id = '$criteria_id' AND period = '$period'")->fetch_assoc();
+        return $totalItem['total_items'] ?? 0;
+    }
+
+    public static function getEnrolleesByTeacherSubjectID($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $teacher_subject = $params['teacher_subject_id'] ?? null;
+
+        if (!$conn || !($conn instanceof mysqli)) {
+            return [];
+        }
+        if (empty($teacher_subject)) {
+            return [];
+        }
+
+        $stmt = $conn->prepare("
+            SELECT tse.*, su.name AS student_name
+            FROM teacher_subject_enrollees tse
+            JOIN student_users su ON tse.student_id = su.id
+            WHERE tse.teacher_subject_id = ? ORDER BY su.name ASC
+        ");
+        $stmt->bind_param("i", $teacher_subject);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $response = [];
+        while ($row = $result->fetch_assoc()) {
+            $response[] = $row;
+        }
+        $stmt->close();
+        return $response;
+    }
+
+    public static function getGradingCriteriaByTeacherSubjectID($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $teacher_subject = $params['teacher_subject_id'] ?? null;
+
+        if (!$conn || !($conn instanceof mysqli)) {
+            return null;
+        }
+        if (empty($teacher_subject)) {
+            return null;
+        }
+
+        $stmt = $conn->prepare("
+            SELECT *
+            FROM grading_criteria
+            WHERE teacher_subject_id = ? and deleted = 0
+        ");
+        $stmt->bind_param("i", $teacher_subject);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $response = [];
+        while ($row = $result->fetch_assoc()) {
+            $response[] = $row;
+        }
+        $stmt->close();
+        return $response;
+    }
 }

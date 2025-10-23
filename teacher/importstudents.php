@@ -27,7 +27,7 @@ if (empty($teacherSubject)) {
     exit;
 }
 
-$coverage = ['1' => 'Prelim', '2' => 'Midterm', '3' => 'Finals'];
+$coverage = ['1' => ['label' => 'Prelim', 'weight' => 20], '2' => ['label' => 'Midterm', 'weight' => 30], '3' => ['label' => 'Finals', 'weight' => 50]];
 
 // $subjects = $conn->query("SELECT id, name, final_rating, remarks, student_id 
 //                        FROM student_grades 
@@ -69,9 +69,20 @@ $students = myTools::getStudentsByTeacherSubject(['teacher_subject_id' => $teach
 // update all students to read flg 1 in teacher_subject_enrollees
 $conn->query("UPDATE teacher_subject_enrollees SET read_flg = 1 WHERE teacher_subject_id = '$teacherSubject'");
 
-$criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_id = '$teacherSubject'")->fetch_all(MYSQLI_ASSOC);
+$criteria = myTools::getGradingCriteriaByTeacherSubjectID([
+    'conn' => $conn,
+    'teacher_subject_id' => $teacherSubject
+]);
 
-// myTools::display(($criteria));exit;
+if (!empty($criteria)) {
+    $criteria[] = [
+        'id' => 0,
+        'teacher_subject_id' => $teacherSubject,
+        'criteria_name' => 'Final Grade',
+        'percentage' => 100
+    ];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -88,7 +99,7 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
     <link rel="stylesheet" href="../public/style/buttons.dataTables.css">
     <script src="../public/js/bootstrap.bundle.min.js"></script>
     <script src="../public/js/jquery-3.7.1.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="../public/fonts/css/all.min.css">
     <link rel="stylesheet" href="../public/style/loading.css">
 
@@ -172,12 +183,14 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                         <li class="nav-item">
                             <a id="navStudents" class="nav-link active" href="#">Student List</a>
                         </li>
-                        <li class="nav-item">
-                            <a id="navAddGrades" class="nav-link" href="#">Add Grades</a>
-                        </li>
-                        <li class="nav-item">
-                            <a id="navGrades" class="nav-link" href="#">Show Grades</a>
-                        </li>
+                        <?php if (!empty($criteria)): ?>
+                            <li class="nav-item">
+                                <a id="navAddGrades" class="nav-link" href="#">Add Grades</a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="navGrades" class="nav-link" href="#">Show Grades</a>
+                            </li>
+                        <?php endif; ?>
                     </ul>
                     <div id="studentsTable">
                         <table id="teacherTable" class="display nowrap table table-bordered mt-3">
@@ -225,7 +238,11 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                             </thead>
                             <tbody>
                                 <?php if (!empty($criteria)): ?>
-                                    <?php foreach ($criteria as $criterion): ?>
+                                    <?php foreach ($criteria as $criterion):
+                                        if ($criterion['id'] == 0) {
+                                            continue; // skip final grade
+                                        }
+                                    ?>
                                         <tr>
                                             <td><?= htmlspecialchars($criterion['criteria_name']) ?></td>
                                             <td><?= htmlspecialchars($criterion['percentage']) ?>%</td>
@@ -244,19 +261,18 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                     </div>
                     <div id="gradesTable" class="mt-3" style="display: none;">
                         <ul class="nav nav-tabs" id="gradeTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="prelim-tab" data-bs-toggle="tab" data-bs-target="#prelim" type="button" role="tab">Prelim</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="midterm-tab" data-bs-toggle="tab" data-bs-target="#midterm" type="button" role="tab">Midterm</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="finals-tab" data-bs-toggle="tab" data-bs-target="#finals" type="button" role="tab">Finals</button>
-                            </li>
+                            <?php foreach ($coverage as $key => $coverageVal): ?>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link <?= $key == 1 ? 'active' : '' ?>" id="<?= strtolower($coverageVal['label']) ?>-tab" data-bs-toggle="tab" data-bs-target="#<?= strtolower($coverageVal['label']) ?>" type="button" role="tab"><?= htmlspecialchars($coverageVal['label']) ?> <?= $coverageVal['weight'] ?>%</button>
+                                </li>
+                            <?php endforeach; ?>
                         </ul>
 
                         <div class="tab-content mt-3" id="gradeTabsContent">
-                            <?php foreach ($coverage as $key => $label): ?>
+                            <?php foreach ($coverage as $key => $coverageVal):
+                                $label = $coverageVal['label'];
+                                $weight = $coverageVal['weight'];
+                            ?>
                                 <div
                                     class="tab-pane fade<?= $key == 1 ? ' show active' : '' ?>"
                                     id="<?= strtolower($label) ?>"
@@ -276,7 +292,7 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                                                     role="tab"
                                                     data-id="<?= $criterion['id'] ?>"
                                                     data-period="<?= strtolower($key) ?>">
-                                                    <?= htmlspecialchars($criterion['criteria_name']) ?> (<?= htmlspecialchars($criterion['percentage']) ?>%)
+                                                    <?= htmlspecialchars($criterion['criteria_name']) ?> <?= isset($criterion['percentage']) ? '(' . htmlspecialchars($criterion['percentage']) . '%)' : '' ?>
                                                 </button>
                                             </li>
                                         <?php endforeach; ?>
@@ -598,6 +614,8 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
         </div>
     </div>
 
+    <?php include('./theme/modals.php'); ?>
+
     <script src="../public/js/loading.js"></script>
 
     <!-- Plugin sa Data Table -->
@@ -742,23 +760,28 @@ $criteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_subject_i
                 const period = $(this).data('period');
                 const target = $(this).data('bs-target'); // tab-pane selector
                 const teacherSubject = <?= json_encode($teacherSubject); ?>;
+                // remove previous content
+                // $(`${target} #fetch_grade_response_${countFetch}`).remove();
+                // countFetch++;
 
                 // Show loading state
                 $(target).html('<div class="text-center py-3">Loading...</div>');
 
+                const url = criterionId == 0 ? 'fetch_grades_all.php' : 'fetch_grades.php';
                 // AJAX request
                 $.ajax({
-                    url: 'fetch_grades.php',
+                    url: url,
                     type: 'POST',
                     data: {
                         criterion_id: criterionId,
-                        period: period
+                        period: period,
+                        teacher_subject: teacherSubject
                     },
                     success: function(response) {
                         $(target).html(response);
                     },
                     error: function() {
-                        $(target).html('<div class="text-danger text-center py-3">Error loading data.</div>');
+                        $(target).html('<div class="text-danger text-center py-3">No data.</div>');
                     }
                 });
             });
