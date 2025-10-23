@@ -177,11 +177,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <td style="white-space: nowrap;" class="total-<?= $key ?>_<?= $cnrId ?>_<?= $enrolleeId ?>">
                             <?= $totalItems == 1
                                 ? "$totalScore x $percentageOfCriterion% = "
-                                : "(($totalScore / $totalItems) x 100) x $percentageOfCriterion% = "
+                                : "($totalScore / $totalItems) x 100 x $percentageOfCriterion% = "
                             ?>
 
 
-                            <?= number_format($weightedScore, 2) ?>
+                            <?= number_format($weightedScore, 2) ?>%
                         </td>
                     </tr>
                 <?php } ?>
