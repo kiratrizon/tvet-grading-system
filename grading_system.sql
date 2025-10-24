@@ -76,7 +76,7 @@ CREATE TABLE `criteria_grades` (
   `criteria_note_record_id` int NOT NULL,
   `score` float NOT NULL,
   `enrollee_id` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 /*COLLATE=utf8mb4_0900_ai_ci*/;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `criteria_grades`
