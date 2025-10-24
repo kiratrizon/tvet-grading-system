@@ -299,4 +299,38 @@ class myTools
         $stmt->close();
         return $response;
     }
+
+    public static function releaseGrades($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $teacher_subject_id = $params['teacher_subject_id'] ?? null;
+        $period = $params['period'] ?? null;
+
+        if (!$conn || !($conn instanceof mysqli)) {
+            return false;
+        }
+        if (empty($teacher_subject_id) || empty($period)) {
+            return false;
+        }
+
+        $now = date('Y-m-d H:i:s');
+        // query if exist
+        $releasedQuery = $conn->query("SELECT id from released_grades where period = '$period' and teacher_subject_id = '$teacher_subject_id'");
+
+        if ($releasedQuery->num_rows > 0) {
+            // already released
+            // update the created timestamp
+            $id = $releasedQuery->fetch_assoc()['id'];
+            $stmt = $conn->prepare("UPDATE released_grades SET created = ? WHERE id = ?");
+            $stmt->bind_param("si", $now, $id);
+            $stmt->execute();
+        } else {
+            // insert new release record
+            $stmt = $conn->prepare("INSERT INTO released_grades (teacher_subject_id, period) VALUES (?, ?)");
+            $stmt->bind_param("is", $teacher_subject_id, $period);
+            $stmt->execute();
+        }
+        $stmt->close();
+        return true;
+    }
 }

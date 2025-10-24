@@ -50,6 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'teacher_subject_id' => $teacherSubject
     ]);
 
+    // is released
+    $releasedQuery = $conn->query("SELECT * from released_grades where period = '$period' and teacher_subject_id = '$teacherSubject'");
+
+    $releasedData = $releasedQuery->fetch_assoc() ?? [];
 
 
     if (empty($enrollees)) {
@@ -68,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div style="position: sticky; top: 0; z-index: 5; background: #fff; text-align: start; padding: 6px 0; border-bottom: 1px solid #dee2e6;">
             <button id="breakdownView" class="btn btn-sm btn-outline-primary">Show Breakdown</button>
+            <button id="releaseGrades" class="btn btn-sm btn-outline-success">Release</button>
         </div>
         <!-- The Table -->
         <table class="table table-bordered align-middle text-center" style="width: max-content; border-collapse: collapse; margin: 0;">
@@ -79,10 +84,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?= htmlspecialchars($val['criteria_name']) ?> (<?= htmlspecialchars($val['percentage']) ?>%)
                         </th>
                     <?php } ?>
-                    <th style="white-space: nowrap;">Total Grade</th>
-                    <th style="white-space: nowrap;">GPE</th>
-                    <!-- remarks -->
-                    <th style="white-space: nowrap;">Remarks</th>
+                    <th style="white-space: nowrap;" class="<?= !empty($releasedData) ? 'text-success' : 'text-danger' ?>"><?= !empty($releasedData) ? 'Total Grade' : 'Tentative Grade' ?></th>
+                    <?php if (!empty($releasedData)) { ?>
+                        <th style="white-space: nowrap;">GPE</th>
+                        <!-- remarks -->
+                        <th style="white-space: nowrap;">Remarks</th>
+                    <?php } ?>
                 </tr>
             </thead>
             <tbody>
@@ -114,19 +121,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $totalPercentage += $totalFormatted;
                         ?>
                             <td style="white-space: nowrap;">
-                                <span style="display: none;" class="for-breakdown">(<?= $totalScore ?> / <?= $totalItems ?>) x <?= $percentage ?>% = </span> <?= $totalFormatted ?>%
+                                <span style="display: none;" class="for-breakdown">
+                                    <?= $totalItems == 1
+                                        ? "$totalScore x $percentage% = "
+                                        : "($totalScore / $totalItems) x 100 x $percentage% = "
+                                    ?>
+                                </span>
+                                <?= $totalFormatted ?>%
                             </td>
+
 
                         <?php } ?>
                         <td style="white-space: nowrap; font-weight: bold;">
                             <?= $totalPercentage ?>%
                         </td>
-                        <td style="white-space: nowrap; font-weight: bold;">
-                            <?= myTools::convertToCollegeGrade($totalPercentage) ?>
-                        </td>
-                        <td style="white-space: nowrap; font-weight: bold;">
-                            <?= myTools::gradeRemark(myTools::convertToCollegeGrade($totalPercentage)) ?>
-                        </td>
+                        <?php if (!empty($releasedData)) { ?>
+                            <td style="white-space: nowrap; font-weight: bold;">
+                                <?= myTools::convertToCollegeGrade($totalPercentage) ?>
+                            </td>
+                            <td style="white-space: nowrap; font-weight: bold;">
+                                <?= myTools::gradeRemark(myTools::convertToCollegeGrade($totalPercentage)) ?>
+                            </td>
+                        <?php } ?>
+
 
                     </tr>
                 <?php } ?>
@@ -146,6 +163,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $('.for-breakdown').hide();
                     $('#breakdownView').text('Show Breakdown');
                 }
+            });
+
+            $("#releaseGrades").on('click', function() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You are about to release the grades. This action cannot be undone.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, release it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: 'release_grades.php',
+                            type: 'POST',
+                            data: {
+                                teacher_subject_id: <?= json_encode($teacherSubject) ?>,
+                                period: <?= json_encode($period) ?>
+                            },
+                            success: function(response) {
+                                if (response.trim() === 'success') {
+                                    Swal.fire({
+                                        title: 'Released!',
+                                        text: 'The grades have been released successfully.',
+                                        icon: 'success',
+                                        showConfirmButton: false,
+                                        timer: 2000 // closes automatically after 2 seconds
+                                    });
+                                    $('.criteria-tab[data-id="0"]').trigger('click');
+
+                                } else {
+                                    Swal.fire(
+                                        'Error!',
+                                        'There was an error releasing the grades.',
+                                        'error'
+                                    );
+                                }
+                            },
+                            error: function() {
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an error releasing the grades.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                })
             });
         });
     </script>

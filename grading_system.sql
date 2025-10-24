@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Oct 23, 2025 at 10:45 AM
+-- Generation Time: Oct 24, 2025 at 08:28 AM
 -- Server version: 8.0.43
 -- PHP Version: 8.3.26
 
@@ -170,6 +170,19 @@ INSERT INTO `grading_criteria` (`id`, `teacher_subject_id`, `criteria_name`, `pe
 (69, 47, 'Exam', 30, 0),
 (77, 47, 'Oral', 30, 0),
 (78, 47, 'Projects', 10, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `released_grades`
+--
+
+CREATE TABLE `released_grades` (
+  `id` int NOT NULL,
+  `period` int NOT NULL,
+  `teacher_subject_id` int NOT NULL,
+  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -615,6 +628,12 @@ ALTER TABLE `grading_criteria`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `released_grades`
+--
+ALTER TABLE `released_grades`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `student_grades`
 --
 ALTER TABLE `student_grades`
@@ -704,6 +723,12 @@ ALTER TABLE `criteria_note_records`
 --
 ALTER TABLE `grading_criteria`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+
+--
+-- AUTO_INCREMENT for table `released_grades`
+--
+ALTER TABLE `released_grades`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `student_grades`
