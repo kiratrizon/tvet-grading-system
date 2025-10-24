@@ -305,6 +305,7 @@ class myTools
         $conn = $params['conn'] ?? null;
         $teacher_subject_id = $params['teacher_subject_id'] ?? null;
         $period = $params['period'] ?? null;
+        $release = $params['release'] ?? false;
 
         if (!$conn || !($conn instanceof mysqli)) {
             return false;
@@ -313,24 +314,56 @@ class myTools
             return false;
         }
 
-        $now = date('Y-m-d H:i:s');
-        // query if exist
-        $releasedQuery = $conn->query("SELECT id from released_grades where period = '$period' and teacher_subject_id = '$teacher_subject_id'");
+        if ($release) {
+            $now = date('Y-m-d H:i:s');
+            // query if exist
+            $releasedQuery = $conn->query("SELECT id from released_grades where period = '$period' and teacher_subject_id = '$teacher_subject_id'");
 
-        if ($releasedQuery->num_rows > 0) {
-            // already released
-            // update the created timestamp
-            $id = $releasedQuery->fetch_assoc()['id'];
-            $stmt = $conn->prepare("UPDATE released_grades SET created = ? WHERE id = ?");
-            $stmt->bind_param("si", $now, $id);
-            $stmt->execute();
+            if ($releasedQuery->num_rows > 0) {
+                // already released
+                // update the created timestamp
+                $id = $releasedQuery->fetch_assoc()['id'];
+                $stmt = $conn->prepare("UPDATE released_grades SET created = ? WHERE id = ?");
+                $stmt->bind_param("si", $now, $id);
+                $stmt->execute();
+            } else {
+                // insert new release record
+                $stmt = $conn->prepare("INSERT INTO released_grades (teacher_subject_id, period) VALUES (?, ?)");
+                $stmt->bind_param("is", $teacher_subject_id, $period);
+                $stmt->execute();
+            }
         } else {
-            // insert new release record
-            $stmt = $conn->prepare("INSERT INTO released_grades (teacher_subject_id, period) VALUES (?, ?)");
+            // revoke release
+            $stmt = $conn->prepare("DELETE FROM released_grades WHERE teacher_subject_id = ? AND period = ?");
             $stmt->bind_param("is", $teacher_subject_id, $period);
             $stmt->execute();
         }
         $stmt->close();
         return true;
+    }
+
+    public static function getAvailablePeriodsByTeacherSubjectID($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $teacher_subject_id = $params['teacher_subject_id'] ?? null;
+
+        if (!$conn || !($conn instanceof mysqli)) {
+            return [];
+        }
+        if (empty($teacher_subject_id)) {
+            return [];
+        }
+
+        $query = $conn->query("SELECT period from released_grades where teacher_subject_id = '$teacher_subject_id'")->fetch_all(MYSQLI_ASSOC);
+        $periods = [
+            '1' => 'Prelim',
+            '2' => 'Midterm',
+            '3' => 'Finals',
+        ];
+        foreach ($query as $row) {
+            unset($periods[$row['period']]);
+        }
+
+        return $periods;
     }
 }

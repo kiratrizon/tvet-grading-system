@@ -33,6 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['grades_file'])) {
         exit();
     }
 
+    $checkBeforeGrading = $conn->query("SELECT * FROM released_grades WHERE teacher_subject_id = '$teacher_subject_id' AND period = '$coverage'");
+
+    if ($checkBeforeGrading->num_rows > 0) {
+        $_SESSION['error'] = "Grades for this period have already been released. Cannot import new grades.";
+        header("Location: importstudents.php?teacher_subject=" . urlencode($teacher_subject_id));
+        exit();
+    }
+
     $coverage = (int)$coverage;
 
     $file = $_FILES['grades_file']['tmp_name'];
@@ -81,6 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['grades_file'])) {
             }
             $fixedData[] = [$id, $score];
         }
+
+
 
         // insert criteria record note first and get the inserted id from criteria_note_records
         $criteriaNoteId = $conn->query("INSERT INTO criteria_note_records (grading_criterion_id, note, period, total_item) VALUES ('$criterion_id', '" . $conn->real_escape_string($note_criteria) . "', '$coverage', '$total_items')");

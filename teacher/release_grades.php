@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $teacher_subject_id = $_POST['teacher_subject_id'] ?? null;
     $period = $_POST['period'] ?? null;
+    $releaseOpt = $_POST['release'] ?? 0 == 1;
     if (empty($teacher_subject_id) || empty($period)) {
         http_response_code(404);
         exit;
@@ -30,7 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $release = myTools::releaseGrades([
         'conn' => $conn,
         'teacher_subject_id' => $teacher_subject_id,
-        'period' => $period
+        'period' => $period,
+        'release' => $releaseOpt
     ]);
 
     if ($release) {

@@ -34,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $criterion_id = $_POST['criterion_id'] ?? null;
     $period = $_POST['period'] ?? null;
     $teacherSubject = $_POST['teacher_subject'] ?? null;
-
     if ($criterion_id != 0 || empty($period) || empty($teacherSubject)) {
         echo '<div class="text-danger text-center py-3">Invalid parameters.</div>';
         exit;
@@ -72,10 +71,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div style="position: sticky; top: 0; z-index: 5; background: #fff; text-align: start; padding: 6px 0; border-bottom: 1px solid #dee2e6;">
             <button id="breakdownView" class="btn btn-sm btn-outline-primary">Show Breakdown</button>
-            <button id="releaseGrades" class="btn btn-sm btn-outline-success">Release</button>
+            <button id="releaseGrades"
+                class="btn btn-sm btn-outline-<?= empty($releasedData) ? 'success' : 'danger' ?>"
+                value="<?= empty($releasedData) ?>"
+                data-teacher="<?= htmlspecialchars($teacherSubject) ?>"
+                data-period="<?= htmlspecialchars($period) ?>">
+                <?= empty($releasedData) ? 'Release' : 'Revoke' ?>
+            </button>
+
         </div>
         <!-- The Table -->
-        <table class="table table-bordered align-middle text-center" style="width: max-content; border-collapse: collapse; margin: 0;">
+        <table class="table table-bordered align-middle text-center" style="width: max-content; border-collapse: collapse; margin: 0;" id="gradesTable">
             <thead class="table-light">
                 <tr>
                     <th style="white-space: nowrap; position: sticky; left: 0; background: #fff; z-index: 2;">Name</th>
@@ -150,69 +156,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </tbody>
         </table>
     </div>
-
-    <script>
-        $(document).ready(function() {
-            let breakdownVisible = false;
-            $('#breakdownView').on('click', function() {
-                breakdownVisible = !breakdownVisible;
-                if (breakdownVisible) {
-                    $('.for-breakdown').show();
-                    $('#breakdownView').text('Hide Breakdown');
-                } else {
-                    $('.for-breakdown').hide();
-                    $('#breakdownView').text('Show Breakdown');
-                }
-            });
-
-            $("#releaseGrades").on('click', function() {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You are about to release the grades. This action cannot be undone.",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, release it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        $.ajax({
-                            url: 'release_grades.php',
-                            type: 'POST',
-                            data: {
-                                teacher_subject_id: <?= json_encode($teacherSubject) ?>,
-                                period: <?= json_encode($period) ?>
-                            },
-                            success: function(response) {
-                                if (response.trim() === 'success') {
-                                    Swal.fire({
-                                        title: 'Released!',
-                                        text: 'The grades have been released successfully.',
-                                        icon: 'success',
-                                        showConfirmButton: false,
-                                        timer: 2000 // closes automatically after 2 seconds
-                                    });
-                                    $('.criteria-tab[data-id="0"]').trigger('click');
-
-                                } else {
-                                    Swal.fire(
-                                        'Error!',
-                                        'There was an error releasing the grades.',
-                                        'error'
-                                    );
-                                }
-                            },
-                            error: function() {
-                                Swal.fire(
-                                    'Error!',
-                                    'There was an error releasing the grades.',
-                                    'error'
-                                );
-                            }
-                        });
-                    }
-                })
-            });
-        });
-    </script>
 <?php } ?>

@@ -98,11 +98,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <!-- Sticky Centered Button -->
         <div style="position: sticky; top: 0; z-index: 5; background: #fff; text-align: start; padding: 6px 0; border-bottom: 1px solid #dee2e6;">
-            <button id="toggleView" class="btn btn-sm btn-outline-primary">Percentage</button>
+            <button id="toggleView" class="btn btn-sm btn-outline-primary" data-raw="true">Percentage</button>
         </div>
 
         <!-- The Table -->
-        <table class="table table-bordered align-middle text-center" style="width: max-content; border-collapse: collapse; margin: 0;">
+        <table id="gradesTable" class="table table-bordered align-middle text-center" style="width: max-content; border-collapse: collapse; margin: 0;">
             <thead class="table-light">
                 <tr>
                     <th style="white-space: nowrap; position: sticky; left: 0; background: #fff; z-index: 2;">Name</th>
@@ -164,6 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             value="<?= isset($scoreData['percentage']) ? floatval($scoreData['percentage']) : '' ?>"
                                             style="width: 70px;">
                                     </form>
+                                    %
                                 </div>
                             </td>
 
@@ -188,94 +189,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </tbody>
         </table>
     </div>
-
-    <script>
-        if (typeof showingRaw === 'undefined') {
-            var showingRaw = true;
-        }
-
-
-        $(document).off('click', '#toggleView').on('click', '#toggleView', function() {
-            showingRaw = !showingRaw;
-
-            if (showingRaw) {
-                $(".grade-raw").show();
-                $(".grade-percentage").hide();
-                $(this).text("Percentage");
-            } else {
-                $(".grade-raw").hide();
-                $(".grade-percentage").show();
-                $(this).text("Raw");
-            }
-        });
-
-        $(document).on('keydown', 'input[class*="grade-input"]', function(e) {
-            if (e.which === 13 && !e.shiftKey) { // 13 = Enter key
-                e.preventDefault(); // stop form submission
-
-                const type = $(this).attr('name'); // 'raw' or 'percentage'
-                const classPrefix = `${type}-`;
-                const matchingClass = Array.from(this.classList).find(cls => cls.startsWith(classPrefix));
-                const keyIndex = matchingClass ? matchingClass.split('-')[1] : null;
-                const getClass = `${type}-${keyIndex}`;
-                const rawClass = `raw-${keyIndex}`;
-                const percentageClass = `percentage-${keyIndex}`;
-                const enrolleeId = keyIndex.split('_')[2];
-                // breakdown the this.class find if it starts ${type}-
-
-
-
-                let $form = $(this).closest('form');
-                let formData = $form.serializeArray();
-                formData.push({
-                    name: 'type',
-                    value: type
-                });
-                $.ajax({
-                    url: 'save_grade.php',
-                    method: 'POST',
-                    data: formData,
-                    success: function(response) {
-                        let data = JSON.parse(response);
-                        // sample response
-                        /* 
-                            echo json_encode([
-                                'score_id' => $scoreId,
-                                'raw_score' => $rawScore,
-                                'percentage_score' => $percentageScore,
-                                'total_score' => $totalScore,
-                                'total_items' => $totalItems,
-                            ]);
-                        */
-                        // update both inputs
-                        // $(`input#${rawId}`).val(50); // sample value
-                        // $(`input#${percentageId}`).val(50); // sample value
-                        $(`input.${rawClass}`).val(data.raw_score);
-                        $(`input.${percentageClass}`).val(data.percentage_score);
-                        // update total score cell
-                        const totalCellClass = `.total-${keyIndex}`;
-                        const percentageTotalScore = (data.total_items > 0) ? (data.total_score / data.total_items) * 100 : 0;
-                        const weightedScore = percentageTotalScore * (<?= $percentageOfCriterion ?> / 100);
-                        $(`${totalCellClass}`).html(`((${data.total_score}/${data.total_items})x100)x<?= $percentageOfCriterion ?>% = ${Number(weightedScore.toFixed(2))}`);
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: 'Score saved successfully!'
-                        });
-                    },
-                    error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to save score. Please try again.'
-                        });
-                    }
-                })
-            }
-        });
-    </script>
-
-
-
 
 <?php } ?>

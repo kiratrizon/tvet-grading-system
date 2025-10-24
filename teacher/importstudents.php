@@ -618,7 +618,6 @@ if (!empty($criteria)) {
 
     <script src="../public/js/loading.js"></script>
 
-    <!-- Plugin sa Data Table -->
     <script src="../public/js/dataTable/dataTables.min.js"></script>
     <script src="../public/js/dataTable/dataTables.buttons.js"></script>
     <script src="../public/js/dataTable/buttons.dataTables.js"></script>
@@ -627,9 +626,10 @@ if (!empty($criteria)) {
     <script src="../public/js/dataTable/vfs_fonts.js"></script>
     <script src="../public/js/dataTable/buttons.html5.min.js"></script>
     <script src="../public/js/dataTable/buttons.print.min.js"></script>
-
     <script src="../public/js/teacher_edit_grades.js"></script>
 
+    <script src="../public/teacher/fetch_grades_all.js"></script>
+    <script src="../public/teacher/fetch_grades.js"></script>
     <script>
         $(document).ready(function() {
             // alert("lasjdlaksdjalkdjalskdj");
@@ -693,6 +693,24 @@ if (!empty($criteria)) {
             $(".add-grades").click(function() {
                 const criterionId = $(this).val();
                 $("#criterion_id").val(criterionId); // put value in hidden input
+                // ajax... check teacherSubjectId
+
+
+                $.ajax({
+                    url: 'get_available_period.php',
+                    type: 'POST',
+                    data: {
+                        teacher_subject_id: <?= json_encode($teacherSubject); ?>,
+                    },
+                    success: function(response) {
+                        const periods = JSON.parse(response);
+                        const coveredSelect = $("#covered");
+                        coveredSelect.html('<option value="" disabled selected>---</option>'); // reset options
+                        Object.entries(periods).forEach(([key, label]) => {
+                            coveredSelect.append(`<option value="${key}">${label}</option>`);
+                        });
+                    },
+                })
                 $("#addGradesModal").modal("show"); // show Bootstrap modal
             });
 
@@ -755,6 +773,8 @@ if (!empty($criteria)) {
                 }
             });
 
+            let countFetch = 0;
+
             $(document).on('click', '.criteria-tab', function() {
                 const criterionId = $(this).data('id');
                 const period = $(this).data('period');
@@ -775,10 +795,18 @@ if (!empty($criteria)) {
                     data: {
                         criterion_id: criterionId,
                         period: period,
-                        teacher_subject: teacherSubject
+                        teacher_subject: teacherSubject,
+                        count_fetch: countFetch
                     },
                     success: function(response) {
                         $(target).html(response);
+                        new DataTable(`${target} #gradesTable`, {
+                            // layout: {
+                            //     topStart: {
+                            //         buttons: ['copy', 'excel', 'pdf']
+                            //     }
+                            // }
+                        });
                     },
                     error: function() {
                         $(target).html('<div class="text-danger text-center py-3">No data.</div>');
