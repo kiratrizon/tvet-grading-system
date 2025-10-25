@@ -27,7 +27,9 @@ if (empty($teacherSubject)) {
     exit;
 }
 
-$coverage = ['1' => ['label' => 'Prelim', 'weight' => 20], '2' => ['label' => 'Midterm', 'weight' => 30], '3' => ['label' => 'Finals', 'weight' => 50]];
+$coverage = myTools::periodList(compact('conn'));
+
+$firstId = strtolower($coverage[1]['label']) ?? null;
 
 // $subjects = $conn->query("SELECT id, name, final_rating, remarks, student_id 
 //                        FROM student_grades 
@@ -36,10 +38,6 @@ $coverage = ['1' => ['label' => 'Prelim', 'weight' => 20], '2' => ['label' => 'M
 $subjects = [];
 
 $row_count = 1;
-
-$studentGrades = $conn->query("SELECT sgv2.*, su.name AS student_name FROM student_grades_v2 sgv2 join student_users su on sgv2.student_id = su.id where sgv2.teacher_subject_id = '$teacherSubject'")->fetch_all(MYSQLI_ASSOC);
-
-// myTools::display(json_encode($studentGrades));exit;
 
 $teacherSubjectDetails = $conn->query("SELECT ts.*, s.s_course_code, s.s_descriptive_title, c.course_name, c.id AS course_id
                                         FROM teacher_subjects ts
@@ -61,9 +59,6 @@ $school_year = $teacherSubjectDetails['school_year'];
 $subject_id = $teacherSubjectDetails['subject_id'];
 $course_id = $teacherSubjectDetails['course'];
 $section = '';
-
-$students = myTools::getStudentsByTeacherSubject(['teacher_subject_id' => $teacherSubject, 'conn' => $conn]);
-
 
 
 // update all students to read flg 1 in teacher_subject_enrollees
@@ -170,14 +165,24 @@ if (!empty($criteria)) {
 
                 <hr>
                 <div class="mt-4">
-                    <form action="export_excel_student_for_grading.php" method="post" target="_new">
-                        <div class="d-flex flex-row gap-4 align-items-center mb-3">
-                            <input type="hidden" name="teacher_subject" value="<?= $teacherSubject ?>">
-                            <button type="submit" class="btn btn-success" name="print_data">
-                                <i class="fa-solid fa-file-excel"></i> Generate Grading Template
-                            </button>
-                        </div>
-                    </form>
+                    <div>
+                        <form action="export_excel_student_for_grading.php" method="post" target="_new">
+                            <div class="d-flex flex-row gap-4 align-items-center mb-3">
+                                <input type="hidden" name="teacher_subject" value="<?= $teacherSubject ?>">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fa-solid fa-file-excel"></i> Generate Grading Template
+                                </button>
+                            </div>
+                        </form>
+                        <form action="print_subject.php" method="post" target="_new">
+                            <div class="d-flex flex-row gap-4 align-items-center mb-3">
+                                <input type="hidden" name="teacher_subject" value="<?= $teacherSubject ?>">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fa-solid fa-print"></i> Print Gradesheet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                     <!-- tab -->
                     <ul class="nav nav-tabs mb-3">
                         <li class="nav-item">
@@ -193,37 +198,7 @@ if (!empty($criteria)) {
                         <?php endif; ?>
                     </ul>
                     <div id="studentsTable">
-                        <table id="teacherTable" class="display nowrap table table-bordered mt-3">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th class="text-start">Enrollee ID</th>
-                                    <th><i class="fa-solid fa-user"></i> Name</th>
-                                    <th class="text-center"><i class="fa-solid fa-cogs"></i> Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($students as $student): ?>
-                                    <tr>
-                                        <td class="text-start"><?= $student['id']; ?></td>
-                                        <td><?= $student['student_name']; ?> <?= !$student['read_flg'] ? '<span class="text-danger">(New)</span>' : '' ?></td>
-                                        <td>
-                                            <div class="action">
-                                                <button type="submit" class="btn btn-primary update" data-bs-toggle="modal" data-bs-target="#editGrades">
-                                                    <i class="fa-solid fa-pencil-alt"></i>
-                                                </button>
-                                                <button type="submit" class="btn btn-warning view" data-bs-toggle="modal" data-bs-target="#viewGrades">
-                                                    <i class="fa-solid fa-eye"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-danger flag-lr" data-bs-toggle="modal" data-bs-target="#flagLRModal" data-student-id="" data-subject-id="" data-studid="" data-studremarks="">
-                                                    <i class="fa-solid fa-flag"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                <?php $row_count++;
-                                endforeach ?>
-                            </tbody>
-                        </table>
+
                     </div>
                     <div id="addGradesArea" class="mt-3" style="display: none;">
                         <!-- Grading Criteria -->
@@ -322,246 +297,6 @@ if (!empty($criteria)) {
         </main>
     </div>
 
-
-
-    <!-- Add Student Modal -->
-    <div
-        class="modal fade"
-        id="addStudent"
-        tabindex="-1"
-        data-bs-backdrop="static"
-        data-bs-keyboard="false"
-        role="dialog"
-        aria-labelledby="modalTitleId"
-        aria-hidden="true">
-        <div
-            class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg"
-            role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitleId">
-                        Add Student Grade
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="p-4">
-                        <form action="insert_student_grade.php" method="post">
-                            <input type="hidden" name="subject_code" value="<?= htmlspecialchars($subject_code) ?>">
-                            <input type="hidden" name="course" value="<?= htmlspecialchars($course ?? '') ?>">
-                            <input type="hidden" name="year_level" value="<?= htmlspecialchars($year_level ?? '') ?>">
-                            <input type="hidden" name="semester" value="<?= htmlspecialchars($semester ?? '') ?>">
-                            <input type="hidden" name="school_year" value="<?= htmlspecialchars($school_year ?? '') ?>">
-                            <input type="hidden" name="course_code" value="<?= htmlspecialchars($subject_code ?? '') ?>">
-                            <input type="hidden" name="descriptive_title" value="<?= htmlspecialchars($descriptiveTitle ?? '') ?>">
-                            <input type="hidden" name="subject_id" value="<?= $subject_id ?>">
-                            <input type="hidden" name="course_id" value="<?= $course_id ?>">
-                            <input type="hidden" name="section" value="<?= $section ?>">
-
-
-
-                            <div class="mb-3">
-                                <label for="adstudentName" class="form-label">Student Name</label>
-                                <input type="text" class="form-control" id="adstudentName" name="name" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="adfinalRating" class="form-label">Final Rating</label>
-                                <input type="number" step="0.01" class="form-control" id="adfinalRating" name="final_rating" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="adremarks" class="form-label">Remarks</label>
-                                <input type="text" class="form-control" id="adremarks" name="remarks" required readonly>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">Add Student Grade</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-    <!-- Flag LR -->
-    <div class="modal fade" id="flagLRModal" tabindex="-1" aria-labelledby="flagLRLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="flagLRLabel">Flag Missing Requirement</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="flagLRForm" action="flag_missing_requirement.php" method="post">
-                        <input type="hidden" id="student_id" name="student_id">
-                        <input type="hidden" id="subject_id" name="subject_id">
-                        <input type="hidden" id="studid" name="studid">
-                        <input type="hidden" id="studremarks" name="studremarks">
-                        <div class="mb-3">
-                            <label for="missing_requirement" class="form-label">Missing Requirement:</label>
-                            <textarea class="form-control" id="missing_requirement" name="missing_requirement" rows="3" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-danger">Submit</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-
-    <!-- View Gradessssssssssssssssssssssssssssssssssssssssssssssss Modal -->
-    <div
-        class="modal fade"
-        id="viewGrades"
-        tabindex="-1"
-        data-bs-backdrop="static"
-        data-bs-keyboard="false"
-
-        role="dialog"
-        aria-labelledby="modalTitleId"
-        aria-hidden="true">
-        <div
-            class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg"
-            role="document">
-            <div class="modal-content">
-                <div class="modal-header" style="background-color: #321337;">
-                    <h5 class="modal-title text-white" id="modalTitleId">
-                        View Student Info
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="p-4">
-                        <form action="updategrades.php" method="post">
-
-                            <div class="form-group mb-3">
-                                <label for="name" class="for-label">Student Name</label>
-                                <input type="text" name="name" id="mvname" readonly class="form-control">
-                            </div>
-
-                            <div class="d-flex flex-row gap-4 mb-3">
-                                <div class="form-group w-100">
-                                    <label for="">Course Code</label>
-                                    <input type="text" name="course_code" id="mvcourse_code" readonly class="form-control">
-                                </div>
-
-                                <div class="form-group w-100">
-                                    <label for="">Descriptive Title</label>
-                                    <input type="text" name="descriptive" id="mvdescriptive" readonly class="form-control">
-                                </div>
-
-                            </div>
-
-                            <div class="d-flex flex-row gap-4 mb-3">
-                                <div class="form-group w-100">
-                                    <label for="">Year Level</label>
-                                    <input type="text" name="year" id="mvyear" readonly class="form-control">
-                                </div>
-                                <div class="form-group w-100">
-                                    <label for="">Semester</label>
-                                    <input type="text" name="semester" id="mvsemester" readonly class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="d-flex flex-row gap-4 mb-3">
-                                <div class="form-group w-100">
-                                    <label for="rating" class="for-label">Final Rating</label>
-                                    <input type="text" name="rating" id="mvrating" readonly class="form-control">
-                                </div>
-
-                                <div class="form-group w-100">
-                                    <label for="remarks" class="for-label">Remarks</label>
-                                    <input type="text" name="remarks" id="mvremarks" readonly class="form-control">
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Gradessssssssssssssssssss Modal -->
-    <div
-        class="modal fade"
-        id="editGrades"
-        tabindex="-1"
-        data-bs-backdrop="static"
-        data-bs-keyboard="false"
-
-        role="dialog"
-        aria-labelledby="modalTitleId"
-        aria-hidden="true">
-        <div
-            class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-md"
-            role="document">
-            <div class="modal-content">
-                <div class="modal-header" style="background-color: #321337;">
-                    <h5 class="modal-title text-white" id="modalTitleId">
-                        Edit Grades
-                    </h5>
-                    <button
-                        type="button"
-                        class="btn-close text-white"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="p-4">
-                        <form action="updategrades.php" method="post">
-                            <input type="hidden" name="id" id="grade_id">
-                            <input type="hidden" name="course_code" id="course_code">
-                            <input type="hidden" name="descriptive" id="descriptive">
-                            <input type="hidden" name="year" id="year">
-                            <input type="hidden" name="semester" id="semester">
-
-
-                            <div class="form-group mb-3">
-                                <label for="name" class="for-label">Student Name</label>
-                                <input type="text" name="name" id="name" class="form-control">
-                            </div>
-
-                            <div class="d-flex flex-row gap-4 mb-3">
-                                <div class="form-group">
-                                    <label for="rating" class="for-label">Final Rating</label>
-                                    <input type="text" name="rating" id="rating" class="form-control">
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="remarks" class="for-label">Remarks</label>
-                                    <input type="text" name="remarks" id="remarks" class="form-control" readonly>
-                                </div>
-                            </div>
-
-
-                            <div>
-                                <button type="submit" name="update_subject" class="btn btn-primary">
-                                    <i class="fa-solid fa-sync"></i> Update Grades
-                                </button>
-                            </div>
-
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
     <!-- add grades modal -->
     <div class="modal fade" id="addGradesModal" tabindex="-1" aria-labelledby="addGradesModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -583,12 +318,9 @@ if (!empty($criteria)) {
 
                         <!-- covered for prelim, midterm, and finals -->
                         <div class="mb-3">
-                            <label for="covered" class="form-label">Coverage (e.g., Prelim, Midterm, Finals)</label>
+                            <label for="covered" class="form-label">Coverage/Period</label>
                             <select name="covered" id="covered" class="form-select" required>
-                                <option value="" disabled selected>---</option>
-                                <option value="1">Prelim</option>
-                                <option value="2">Midterm</option>
-                                <option value="3">Finals</option>
+
                             </select>
 
                         </div>
@@ -656,7 +388,26 @@ if (!empty($criteria)) {
                 $("#navStudents").addClass("active");
                 $("#navGrades").removeClass("active");
                 $("#navAddGrades").removeClass("active");
+                $.ajax({
+                    url: 'student_grades_final.php',
+                    type: 'POST',
+                    data: {
+                        teacher_subject_id: <?= json_encode($teacherSubject); ?>,
+                    },
+                    success: function(response) {
+                        $("#studentsTable").html(response);
+                        new DataTable("#teacherTable", {
+                            // layout: {
+                            //     topStart: '<"d-flex justify-content-between"fB>',
+                            //  bottomStart: 'p',
+                            // },
+                        })
+                    },
+                })
             });
+
+            // trigger $('#navStudents').click();
+            $("#navStudents").trigger("click");
 
             $("#navGrades").click(function(e) {
                 e.preventDefault();
@@ -667,7 +418,7 @@ if (!empty($criteria)) {
                 $("#navStudents").removeClass("active");
                 $("#navAddGrades").removeClass("active");
                 // Optionally trigger the first criteria of the first period on initial load
-                const firstPeriodTab = $('.nav-link[data-bs-target="#prelim"]'); // adjust if needed
+                const firstPeriodTab = $('.nav-link[data-bs-target="#<?= $firstId ?>"]'); // adjust if needed
                 if (firstPeriodTab.length) {
                     const targetPane = $(firstPeriodTab.data('bs-target'));
                     const firstCriteriaTab = targetPane.find('.criteria-tab').first();
@@ -753,14 +504,6 @@ if (!empty($criteria)) {
                 } else {
                     remarksField.value = "Invalid Grade";
                 }
-            });
-
-            new DataTable('#teacherTable', {
-                // layout: {
-                //     topStart: {
-                //         buttons: ['copy', 'excel', 'pdf']
-                //     }
-                // }
             });
 
             $(document).on('shown.bs.tab', '[data-bs-target^="#"]', function(e) {

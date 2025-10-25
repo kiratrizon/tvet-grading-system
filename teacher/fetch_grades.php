@@ -41,6 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tempRowTable = $conn->query("SELECT tse.id as enrollee_id, su.name as student_name FROM teacher_subject_enrollees tse join student_users su on tse.student_id = su.id WHERE tse.teacher_subject_id = '$teacherSubject' order by su.name ASC;")->fetch_all(MYSQLI_ASSOC);
 
 
+    $releasedQuery = $conn->query("SELECT * from released_grades where period = '$period' and teacher_subject_id = '$teacherSubject'");
+
+    $releasedData = $releasedQuery->fetch_assoc() ?? [];
 
     // make enrollee_id as key and student_name as value
     $rowTable = [];
@@ -74,6 +77,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $rowTable[$enrolleeId] = $val;
     }
 
+    if (!$rowTable) {
+        // return with status code 404
+        http_response_code(404);
+        exit;
+    }
     // myTools::display(($rowTable));
     // exit;
 ?>
@@ -147,7 +155,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             name="raw"
                                             class="form-control form-control-sm text-center grade-input raw-<?= $key ?>_<?= $cnrId ?>_<?= $enrolleeId ?>"
                                             value="<?= htmlspecialchars($scoreData['raw'] ?? '') ?>"
-                                            style="width: 70px;">
+                                            style="width: 70px;"
+                                            <?= !empty($releasedData) ? 'readonly' : '' ?>
+                                            data-released="<?= !empty($releasedData) ? '1' : '0' ?>">
                                     </form>
                                 </div>
 
@@ -162,7 +172,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             name="percentage"
                                             class="form-control form-control-sm text-center grade-input percentage-<?= $key ?>_<?= $cnrId ?>_<?= $enrolleeId ?>"
                                             value="<?= isset($scoreData['percentage']) ? floatval($scoreData['percentage']) : '' ?>"
-                                            style="width: 70px;">
+                                            style="width: 70px;"
+                                            <?= !empty($releasedData) ? 'readonly' : '' ?>
+                                            data-released="<?= !empty($releasedData) ? '1' : '0' ?>">
                                     </form>
                                     %
                                 </div>

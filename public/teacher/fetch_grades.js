@@ -24,44 +24,47 @@ $(document).off('keydown', 'input[class*="grade-input"]').on('keydown', 'input[c
         const classPrefix = `${type}-`;
         const matchingClass = Array.from(this.classList).find(cls => cls.startsWith(classPrefix));
         const keyIndex = matchingClass ? matchingClass.split('-')[1] : null;
-        const getClass = `${type}-${keyIndex}`;
         const rawClass = `raw-${keyIndex}`;
         const percentageClass = `percentage-${keyIndex}`;
-        const enrolleeId = keyIndex.split('_')[2];
 
         const $form = $(this).closest('form');
         const formData = $form.serializeArray();
         formData.push({ name: 'type', value: type });
 
-        $.ajax({
-            url: 'save_grade.php',
-            method: 'POST',
-            data: formData,
-            success: function(response) {
-                const data = JSON.parse(response);
-                const totalCellClass = `.total-${keyIndex}`;
-                const percentageTotalScore = (data.total_items > 0) ? (data.total_score / data.total_items) * 100 : 0;
-                const weightedScore = percentageTotalScore * (data.percentageOfCriterion / 100);
+        const relesed = $(this).data('released') == 1;
 
-                $(`input.${rawClass}`).val(data.raw_score);
-                $(`input.${percentageClass}`).val(data.percentage_score);
-                $(totalCellClass).html(`((${data.total_score}/${data.total_items})x100)x${data.percentageOfCriterion}% = ${weightedScore.toFixed(2)}`);
+        if (!relesed){
+            $.ajax({
+                url: 'save_grade.php',
+                method: 'POST',
+                data: formData,
+                success: function(response) {
+                    const data = JSON.parse(response);
+                    const totalCellClass = `.total-${keyIndex}`;
+                    const percentageTotalScore = (data.total_items > 0) ? (data.total_score / data.total_items) * 100 : 0;
+                    const weightedScore = percentageTotalScore * (data.percentageOfCriterion / 100);
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: 'Score saved successfully!',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            },
-            error: function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to save score. Please try again.'
-                });
-            }
-        });
+                    $(`input.${rawClass}`).val(data.raw_score);
+                    $(`input.${percentageClass}`).val(data.percentage_score);
+                    $(totalCellClass).html(`((${data.total_score}/${data.total_items})x100)x${data.percentageOfCriterion}% = ${weightedScore.toFixed(2)}`);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: 'Score saved successfully!',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                },
+                error: function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to save score. Please try again.'
+                    });
+                }
+            });
+        }
+        
     }
 });

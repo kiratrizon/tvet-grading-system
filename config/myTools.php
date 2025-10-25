@@ -134,7 +134,7 @@ class myTools
             SELECT tse.*, su.name AS student_name
             FROM teacher_subject_enrollees tse
             JOIN student_users su ON tse.student_id = su.id
-            WHERE tse.teacher_subject_id = ?
+            WHERE tse.teacher_subject_id = ? ORDER BY su.name ASC
         ");
         $stmt->bind_param("i", $teacher_subject_id);
         $stmt->execute();
@@ -148,29 +148,36 @@ class myTools
 
     public static function convertToCollegeGrade($percent)
     {
-        if ($percent >= 97) return 1.0;
-        if ($percent >= 94) return 1.25;
-        if ($percent >= 91) return 1.5;
-        if ($percent >= 88) return 1.75;
+        if ($percent >= 95) return 1.0;
+        if ($percent >= 94) return 1.1;
+        if ($percent >= 93) return 1.2;
+        if ($percent >= 92) return 1.3;
+        if ($percent >= 91) return 1.4;
+        if ($percent >= 90) return 1.5;
+        if ($percent >= 89) return 1.6;
+        if ($percent >= 88) return 1.7;
+        if ($percent >= 87) return 1.8;
+        if ($percent >= 86) return 1.9;
         if ($percent >= 85) return 2.0;
-        if ($percent >= 82) return 2.25;
-        if ($percent >= 79) return 2.5;
-        if ($percent >= 76) return 2.75;
+        if ($percent >= 84) return 2.1;
+        if ($percent >= 83) return 2.2;
+        if ($percent >= 82) return 2.3;
+        if ($percent >= 81) return 2.4;
+        if ($percent >= 80) return 2.5;
+        if ($percent >= 79) return 2.6;
+        if ($percent >= 78) return 2.7;
+        if ($percent >= 77) return 2.8;
+        if ($percent >= 76) return 2.9;
         if ($percent >= 75) return 3.0;
-        if ($percent >= 70) return 3.5;
-        if ($percent >= 60) return 4.0;
-        return 5.0; // Fail
+        if ($percent >= 70) return 3.5; // Conditional (Below passing)
+        if ($percent >= 60) return 4.0; // Failed but with effort
+        return 5.0; // Failed
     }
 
     public static function gradeRemark($grade)
     {
-        if ($grade == 1.0) return "Passed";
-        if ($grade <= 1.75) return "Passed";
-        if ($grade <= 2.5) return "Passed";
-        if ($grade == 2.75) return "Passed";
-        if ($grade == 3.0) return "Passed";
-        if ($grade == 3.5) return "Conditional";
-        if ($grade == 4.0) return "Conditional";
+        if ($grade <= 3.0) return "Passed";
+        if ($grade <= 4.0 && $grade > 3.0) return "Conditional";
         return "Failed";
     }
 
@@ -355,15 +362,98 @@ class myTools
         }
 
         $query = $conn->query("SELECT period from released_grades where teacher_subject_id = '$teacher_subject_id'")->fetch_all(MYSQLI_ASSOC);
-        $periods = [
-            '1' => 'Prelim',
-            '2' => 'Midterm',
-            '3' => 'Finals',
-        ];
+        $queryPeriods = self::periodList(['conn' => $conn]);
+        $periods = [];
+        foreach ($queryPeriods as $key => $val) {
+            $periods[$key] = $val['label'];
+        }
         foreach ($query as $row) {
             unset($periods[$row['period']]);
         }
 
         return $periods;
+    }
+
+    public static function getEnrolleesReleasedGrades($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $teacher_subject_id = $params['teacher_subject_id'] ?? null;
+        $period = $params['period'] ?? null;
+        $studentId = $params['enrollee_id'] ?? null;
+
+        if (!$conn || !($conn instanceof mysqli)) {
+            return null;
+        }
+        if (empty($teacher_subject_id) || empty($period) || empty($studentId)) {
+            return null;
+        }
+
+        // check if already released
+        $releasedQuery = $conn->query("SELECT * from released_grades where period = '$period' and teacher_subject_id = '$teacher_subject_id'");
+        if (!$releasedQuery->num_rows) {
+            // already released
+            return null;
+        }
+        // get all grading criteria for this teacher_subject_id
+        $gradingCriteria = self::getGradingCriteriaByTeacherSubjectID([
+            'conn' => $conn,
+            'teacher_subject_id' => $teacher_subject_id
+        ]);
+        $totalPercentage = 0;
+        foreach ($gradingCriteria as $criterion) {
+            $criterionId = $criterion['id'];
+            // get total item for this criterion and period
+            $totalItem = self::getTotalItemByCriteriaAndPeriod([
+                'conn' => $conn,
+                'criteria_id' => $criterionId,
+                'period' => $period
+            ]);
+            // get enrollee's total score for this criterion and period
+            $totalScore = self::getEnrolleeAllGradesByCriteriaAndPeriod([
+                'conn' => $conn,
+                'criteria_id' => $criterionId,
+                'period' => $period,
+                'enrollee_id' => $studentId
+            ]);
+            // calculate percentage
+            $percentage = 0;
+            if ($totalItem > 0) {
+                $percentage = number_format((($totalScore / $totalItem) * 100) * ($criterion['percentage'] / 100), 2);
+            }
+            $totalPercentage += $percentage;
+        }
+        return $totalPercentage;
+    }
+
+    public static function periodList($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        if (!$conn || !($conn instanceof mysqli)) {
+            return [];
+        }
+        $periods = $conn->query("SELECT * FROM periods order by weight")->fetch_all(MYSQLI_ASSOC);
+        $newPeriods = [];
+        foreach ($periods as $period) {
+            $id = $period['id'];
+            unset($period['id']);
+            $newPeriods[$id] = $period;
+        }
+        return $newPeriods;
+    }
+
+    public static function getTeacherSubjectById($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $teacher_subject_id = $params['teacher_subject_id'] ?? null;
+
+        if (!$conn || !($conn instanceof mysqli)) {
+            return null;
+        }
+        if (empty($teacher_subject_id)) {
+            return null;
+        }
+
+        $subjectData = $conn->query("SELECT * FROM teacher_subjects WHERE id = '$teacher_subject_id'")->fetch_assoc();
+        return $subjectData ?? null;
     }
 }

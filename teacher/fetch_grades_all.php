@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
     if (empty($enrollees)) {
-        echo '<div class="text-danger text-center py-3">No enrollees found.</div>';
+        echo '<div class="text-danger text-center py-3">No data.</div>';
         exit;
     }
 
@@ -71,13 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <div style="position: sticky; top: 0; z-index: 5; background: #fff; text-align: start; padding: 6px 0; border-bottom: 1px solid #dee2e6;">
             <button id="breakdownView" class="btn btn-sm btn-outline-primary">Show Breakdown</button>
-            <button id="releaseGrades"
-                class="btn btn-sm btn-outline-<?= empty($releasedData) ? 'success' : 'danger' ?>"
-                value="<?= empty($releasedData) ?>"
-                data-teacher="<?= htmlspecialchars($teacherSubject) ?>"
-                data-period="<?= htmlspecialchars($period) ?>">
-                <?= empty($releasedData) ? 'Release' : 'Revoke' ?>
-            </button>
+            <?php if (empty($releasedData)) { ?>
+
+                <button id="releaseGrades"
+                    class="btn btn-sm btn-outline-success"
+                    value="1"
+                    data-teacher="<?= htmlspecialchars($teacherSubject) ?>"
+                    data-period="<?= htmlspecialchars($period) ?>">
+                    Release
+                </button>
+            <?php } ?>
 
         </div>
         <!-- The Table -->

@@ -16,13 +16,12 @@ $(document).off('click', '#breakdownView').on('click', '#breakdownView', functio
 
 $(document).off('click', '#releaseGrades').on('click', '#releaseGrades', function() {
     const $btn = $(this);
-    const val = $btn.val();
     const teacherSubjectId = $btn.data('teacher');
     const period = $btn.data('period');
 
     Swal.fire({
         title: 'Are you sure?',
-        text: `You are about to ${val == 1 ? 'release' : 'revoke'} the grades.`,
+        text: `You are about to release the grades. This cannot be undone.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
@@ -36,13 +35,13 @@ $(document).off('click', '#releaseGrades').on('click', '#releaseGrades', functio
                 data: {
                     teacher_subject_id: teacherSubjectId,
                     period: period,
-                    release: val
+                    release: 1
                 },
                 success: function(response) {
                     if (response.trim() === 'success') {
                         Swal.fire({
-                            title: `${val == 1 ? 'Released' : 'Revoked'}!`,
-                            text: `The grades have been ${val == 1 ? 'released' : 'revoked'} successfully.`,
+                            title: `Released!`,
+                            text: `The grades have been released successfully.`,
                             icon: 'success',
                             showConfirmButton: false,
                             timer: 2000

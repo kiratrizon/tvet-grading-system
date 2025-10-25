@@ -1,67 +1,37 @@
 <?php
+session_start();
 require_once '../config/conn.php';
+require_once '../config/myTools.php';
 
+$teacherSubject = $_POST['teacher_subject'] ?? '';
 
+$teacher_id = $_SESSION['teacher_id'] ?? '';
 
-$teacher_id = $_POST['teacher_id'] ?? '';
-$course = $_POST['course'] ?? '';
-$course_id = $_POST['course_id'] ?? '';
-$year_level = $_POST['year_level'] ?? '';
-$semester = $_POST['semester'] ?? '';
-$school_year = $_POST['school_year'] ?? '';
-$descriptive_title = $_POST['descriptive_title'] ?? '';
-$subject_id = $_POST['subject_id'] ?? '';
-
-
-$query = $conn->prepare("
-    SELECT DISTINCT
-        t.t_id, t.t_name, t.t_gender, t.status, t.t_image, 
-        c.course_code, c.course_name, sg.name, sg.year_level, 
-        sg.semester,
-        sg.course_code AS COURSECODE,
-        sg.school_year, sg.descriptive_title, 
-        sg.final_rating, sg.remarks, sub.s_units
-    FROM teachers t
-    JOIN student_grades sg ON t.t_id = sg.teacher_id
-    LEFT JOIN teacher_subjects ts ON sg.teacher_id = ts.teacher_id AND sg.descriptive_title = ?
-    LEFT JOIN subjects sub ON ts.subject_id = sub.s_id
-    JOIN courses c ON c.id = sg.course
-    WHERE t.t_id = ? 
-    AND c.id = ? 
-    AND sg.year_level = ? 
-    AND sg.semester = ? 
-    AND sg.school_year = ? 
-    AND sub.s_id = ?
-    ORDER BY sg.name ASC
-");
-$query->bind_param("sssssss", $descriptive_title, $teacher_id, $course_id, $year_level, $semester, $school_year, $subject_id);
-
-$query->execute();
-$result = $query->get_result();
-
-$teacher = null;
-$students = [];
-
-while ($row = $result->fetch_assoc()) {
-    if (!$teacher) {
-        $teacher = [
-            't_id' => $row['t_id'],
-            't_name' => $row['t_name'],
-            't_gender' => $row['t_gender'],
-            'status' => $row['status'],
-            't_image' => $row['t_image'],
-            'course_code' => $row['COURSECODE']
-        ];
-    }
-    $students[] = $row;
+if (empty($teacherSubject) || empty($teacher_id)) {
+    echo "<script>alert('Invalid parameters. Please go back and try again.'); window.close();</script>";
+    exit;
 }
 
+$teacherSubjectRow = myTools::getTeacherSubjectByID([
+    'conn' => $conn,
+    'teacher_subject_id' => $teacherSubject
+]);
 
-if (!$teacher) {
+if (!$teacherSubjectRow) {
     echo "<script>alert('No data found for the selected subject. Please check your inputs.'); window.close();</script>";
     exit;
 }
 
+$students = myTools::getStudentsByTeacherSubject(
+    [
+        'conn' => $conn,
+        'teacher_subject_id' => $teacherSubject
+    ]
+);
+
+$periods = myTools::periodList([
+    'conn' => $conn
+]);
 
 
 $admin = $conn->query("SELECT * FROM admin");
@@ -97,6 +67,19 @@ $row_count = 1;
         body {
             font-size: 14px;
         }
+
+        @media print {
+            @page {
+                margin: 10mm;
+                /* Removes headers and footers in most browsers */
+                size: auto;
+            }
+
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
     </style>
 </head>
 
@@ -111,25 +94,21 @@ $row_count = 1;
                 <span style="letter-spacing: 10px; font-weight: 700; border-bottom: 2px solid transparent;background: linear-gradient(to right, black 50%, transparent 50%) repeat-x bottom;background-size: 10px 2px;">GRADING SHEET</span>
             </div>
 
-            <p>YEAR LEVEL: <span style="font-weight: 600;"><?= htmlspecialchars($year_level) ?></span></p>
+            <p>YEAR LEVEL: <span style="font-weight: 600;"><?= htmlspecialchars($teacherSubjectRow['year_level']) ?></span></p>
             <?php
-            $full_course = $course;
+            $courseId = $teacherSubjectRow['course'];
+            $getCourseRow = $conn->query("SELECT * FROM courses WHERE id = $courseId")->fetch_assoc();
 
-            $query = $conn->prepare("SELECT course_name FROM courses WHERE course_code = ?");
-            $query->bind_param("s", $course);
-            $query->execute();
-            $result = $query->get_result();
-            if ($row = $result->fetch_assoc()) {
-                $full_course = $row['course_name'];
-            }
+            $subjectRow = $conn->query("SELECT * FROM subjects WHERE s_id = " . $teacherSubjectRow['subject_id'])->fetch_assoc();
+            $teacher = $conn->query("SELECT * FROM teachers WHERE t_id = " . $teacherSubjectRow['teacher_id'])->fetch_assoc();
             ?>
-            <p>COURSE: <span style="font-weight: 600;"><?= htmlspecialchars($full_course) ?></span></p>
-            <p>SUBJECT: <span style="font-weight: 600;"><?= htmlspecialchars($teacher['course_code']); ?></span></p>
-            <p>DESCRIPTION: <span style="font-weight: 600;"> <?= htmlspecialchars($descriptive_title) ?></span></p>
+            <p>COURSE: <span style="font-weight: 600;"><?= htmlspecialchars($getCourseRow['course_name']) ?></span></p>
+            <p>SUBJECT: <span style="font-weight: 600;"><?= htmlspecialchars($subjectRow['s_course_code']) ?></span></p>
+            <p>DESCRIPTION: <span style="font-weight: 600;"> <?= htmlspecialchars($subjectRow['s_descriptive_title']) ?></span></p>
+            <p>UNITS: <span style="font-weight: 600;"><?= htmlspecialchars($subjectRow['s_units']) ?></span></p>
 
             <div class="d-flex flex-row justify-content-between">
-                <p>INSTRUCTOR: <span style="font-weight: 600;"><?= htmlspecialchars($teacher['t_name']) ?> </span></p>
-                <p>SEMESTER: <span style="font-weight: 600;"><?= htmlspecialchars($semester) ?> </span></p>
+                <p>SEMESTER: <span style="font-weight: 600;"><?= htmlspecialchars($teacherSubjectRow['semester']) ?> </span></p>
             </div>
 
 
@@ -142,23 +121,39 @@ $row_count = 1;
                         <th>No.</th>
                         <th>Name</th>
                         <th>Final Rating</th>
-                        <th>Units</th>
                         <th>Remarks</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!empty($students)): ?>
-                        <?php foreach ($students as $student): ?>
+                        <?php foreach ($students as $student):
+                            $totalByPercent = 0;
+                            $totalAdded = 0;
+                            foreach ($periods as $key => $period) {
+                                $enrolleeReleasedGrades = myTools::getEnrolleesReleasedGrades([
+                                    'conn' => $conn,
+                                    'enrollee_id' => $student['id'],
+                                    'teacher_subject_id' => $teacherSubject,
+                                    'period' => $key
+                                ]);
+                                if (isset($enrolleeReleasedGrades) && is_numeric($enrolleeReleasedGrades)) {
+                                    $totalByPercent += ($enrolleeReleasedGrades * ($period['weight'] / 100));
+                                    $totalAdded++;
+                                }
+                            }
+                            $finalRating = myTools::convertToCollegeGrade(round($totalByPercent, 2));
+                            $remark = myTools::gradeRemark($finalRating);
+                        ?>
                             <tr>
                                 <td style="width: 50px;"><?= $row_count; ?></td>
-                                <td style="text-transform:uppercase"><?= htmlspecialchars($student['name']) ?></td>
-                                <td style="width: 130px;"><?= htmlspecialchars($student['final_rating']) ?></td>
-                                <td style="width: 130px;"><?= htmlspecialchars($student['s_units']) ?></td>
-                                <td style="width: 130px;"><?= htmlspecialchars($student['remarks']) ?></td>
+                                <td style="text-transform:uppercase"><?= htmlspecialchars($student['student_name']) ?></td>
+                                <td style="width: 130px;"><?= htmlspecialchars($finalRating) ?></td>
+                                <td style="width: 130px;"><?= htmlspecialchars($remark) ?></td>
                             </tr>
                         <?php
                             $row_count++;
-                        endforeach; ?>
+                        endforeach;
+                        ?>
                     <?php else: ?>
                         <tr>
                             <td colspan="4" class="text-center text-danger">No students found.</td>
@@ -221,6 +216,11 @@ $row_count = 1;
         </div>
     </div>
 
+    <script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
 </body>
 
 </html>
