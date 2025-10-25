@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.3
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: db
--- Generation Time: Oct 24, 2025 at 08:28 AM
--- Server version: 8.0.43
--- PHP Version: 8.3.26
+-- Host: 127.0.0.1
+-- Generation Time: Oct 25, 2025 at 08:18 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -28,11 +28,11 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `admin` (
-  `a_id` int NOT NULL,
-  `a_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `a_user_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `a_password` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `a_image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `a_id` int(11) NOT NULL,
+  `a_name` text NOT NULL,
+  `a_user_name` text NOT NULL,
+  `a_password` text NOT NULL,
+  `a_image` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -50,9 +50,9 @@ INSERT INTO `admin` (`a_id`, `a_name`, `a_user_name`, `a_password`, `a_image`) V
 --
 
 CREATE TABLE `courses` (
-  `id` int NOT NULL,
-  `course_code` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `course_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `id` int(11) NOT NULL,
+  `course_code` varchar(20) NOT NULL,
+  `course_name` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -72,11 +72,11 @@ INSERT INTO `courses` (`id`, `course_code`, `course_name`) VALUES
 --
 
 CREATE TABLE `criteria_grades` (
-  `id` int NOT NULL,
-  `criteria_note_record_id` int NOT NULL,
+  `id` int(11) NOT NULL,
+  `criteria_note_record_id` int(11) NOT NULL,
   `score` float NOT NULL,
-  `enrollee_id` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `enrollee_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `criteria_grades`
@@ -118,7 +118,85 @@ INSERT INTO `criteria_grades` (`id`, `criteria_note_record_id`, `score`, `enroll
 (33, 6, 40, 3),
 (34, 6, 30, 4),
 (35, 6, 15, 5),
-(36, 6, 23, 6);
+(36, 6, 23, 6),
+(37, 7, 20, 1),
+(38, 7, 30, 2),
+(39, 7, 40, 3),
+(40, 7, 30, 4),
+(41, 7, 10, 5),
+(42, 7, 23, 6),
+(43, 8, 20, 1),
+(44, 8, 30, 2),
+(45, 8, 40, 3),
+(46, 8, 30, 4),
+(47, 8, 15, 5),
+(48, 8, 23, 6),
+(49, 9, 20, 1),
+(50, 9, 18, 2),
+(51, 9, 20, 3),
+(52, 9, 14, 4),
+(53, 9, 20, 5),
+(54, 9, 19, 6),
+(55, 10, 29, 1),
+(56, 10, 25, 2),
+(57, 10, 20, 3),
+(58, 10, 26, 4),
+(59, 10, 40, 5),
+(60, 10, 29, 6),
+(61, 11, 55, 1),
+(62, 11, 89, 2),
+(63, 11, 74, 3),
+(64, 11, 59, 4),
+(65, 11, 76, 5),
+(66, 11, 53, 6),
+(67, 12, 1, 1),
+(68, 12, 1, 2),
+(69, 12, 1, 3),
+(70, 12, 1, 4),
+(71, 12, 1, 5),
+(72, 12, 1, 6),
+(73, 13, 25, 1),
+(74, 13, 30, 2),
+(75, 13, 35, 3),
+(76, 13, 25, 4),
+(77, 13, 30, 5),
+(78, 13, 25, 6),
+(79, 14, 100, 1),
+(80, 14, 100, 2),
+(81, 14, 100, 3),
+(82, 14, 100, 4),
+(83, 14, 100, 5),
+(84, 14, 100, 6),
+(85, 15, 20, 1),
+(86, 15, 20, 2),
+(87, 15, 20, 3),
+(88, 15, 20, 4),
+(89, 15, 20, 5),
+(90, 15, 20, 6),
+(91, 16, 1, 1),
+(92, 16, 1, 2),
+(93, 16, 1, 3),
+(94, 16, 1, 4),
+(95, 16, 1, 5),
+(96, 16, 1, 6),
+(97, 17, 60, 1),
+(98, 17, 60, 2),
+(99, 17, 82, 3),
+(100, 17, 66, 4),
+(101, 17, 77, 5),
+(102, 17, 69, 6),
+(103, 18, 10, 1),
+(104, 18, 20, 2),
+(105, 18, 10, 3),
+(106, 18, 20, 4),
+(107, 18, 10, 5),
+(108, 18, 15, 6),
+(109, 19, 50, 1),
+(110, 19, 75, 2),
+(111, 19, 75, 3),
+(112, 19, 80, 4),
+(113, 19, 75, 5),
+(114, 19, 70, 6);
 
 -- --------------------------------------------------------
 
@@ -127,12 +205,12 @@ INSERT INTO `criteria_grades` (`id`, `criteria_note_record_id`, `score`, `enroll
 --
 
 CREATE TABLE `criteria_note_records` (
-  `id` int NOT NULL,
-  `grading_criterion_id` int NOT NULL,
+  `id` int(11) NOT NULL,
+  `grading_criterion_id` int(11) NOT NULL,
   `note` varchar(255) NOT NULL,
-  `period` int NOT NULL,
-  `total_item` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `period` int(11) NOT NULL,
+  `total_item` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `criteria_note_records`
@@ -144,7 +222,20 @@ INSERT INTO `criteria_note_records` (`id`, `grading_criterion_id`, `note`, `peri
 (3, 68, 'Attendance', 1, 1),
 (4, 69, 'Exam', 1, 50),
 (5, 77, 'Oral', 1, 40),
-(6, 78, 'Projects', 1, 50);
+(6, 78, 'Projects', 1, 50),
+(7, 66, 'quz3', 1, 20),
+(8, 81, 'Quiz 1', 1, 20),
+(9, 66, 'Quiz 1', 2, 20),
+(10, 66, 'Quiz 2', 2, 50),
+(11, 69, 'Exam Mid', 2, 100),
+(12, 68, 'Attendance', 2, 1),
+(13, 77, 'Oral', 2, 50),
+(14, 78, 'Projects', 2, 100),
+(15, 66, 'Quiz', 3, 20),
+(16, 68, 'Attendance', 3, 1),
+(17, 69, 'Exam Final', 3, 100),
+(18, 77, 'Oral', 3, 20),
+(19, 78, 'Project', 3, 100);
 
 -- --------------------------------------------------------
 
@@ -153,12 +244,12 @@ INSERT INTO `criteria_note_records` (`id`, `grading_criterion_id`, `note`, `peri
 --
 
 CREATE TABLE `grading_criteria` (
-  `id` int NOT NULL,
-  `teacher_subject_id` int NOT NULL,
+  `id` int(11) NOT NULL,
+  `teacher_subject_id` int(11) NOT NULL,
   `criteria_name` varchar(255) NOT NULL,
   `percentage` float NOT NULL,
-  `deleted` int NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `deleted` int(11) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `grading_criteria`
@@ -169,20 +260,11 @@ INSERT INTO `grading_criteria` (`id`, `teacher_subject_id`, `criteria_name`, `pe
 (68, 47, 'Attendance', 10, 0),
 (69, 47, 'Exam', 30, 0),
 (77, 47, 'Oral', 30, 0),
-(78, 47, 'Projects', 10, 0);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `released_grades`
---
-
-CREATE TABLE `released_grades` (
-  `id` int NOT NULL,
-  `period` int NOT NULL,
-  `teacher_subject_id` int NOT NULL,
-  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+(78, 47, 'Projects', 10, 0),
+(79, 51, 'Attendance', 10, 0),
+(80, 51, 'Performance', 50, 0),
+(81, 51, 'Quiz', 20, 0),
+(82, 51, 'Activities', 20, 0);
 
 -- --------------------------------------------------------
 
@@ -191,20 +273,20 @@ CREATE TABLE `released_grades` (
 --
 
 CREATE TABLE `student_grades` (
-  `id` int NOT NULL,
-  `student_id` int NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `course` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `year_level` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `semester` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `school_year` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `course_code` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `descriptive_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `course` varchar(100) NOT NULL,
+  `year_level` varchar(150) NOT NULL,
+  `semester` varchar(150) NOT NULL,
+  `school_year` varchar(120) NOT NULL,
+  `course_code` varchar(150) NOT NULL,
+  `descriptive_title` varchar(255) NOT NULL,
   `final_rating` decimal(3,1) NOT NULL,
-  `remarks` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `teacher_id` int NOT NULL,
-  `subject_id` int NOT NULL,
-  `section` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `remarks` varchar(100) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `section` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -231,13 +313,13 @@ INSERT INTO `student_grades` (`id`, `student_id`, `name`, `course`, `year_level`
 --
 
 CREATE TABLE `student_grades_v2` (
-  `id` int NOT NULL,
-  `student_id` int NOT NULL,
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
   `prelim` float NOT NULL,
   `midterm` float NOT NULL,
   `finals` float NOT NULL,
-  `teacher_subject_id` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `teacher_subject_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -246,15 +328,23 @@ CREATE TABLE `student_grades_v2` (
 --
 
 CREATE TABLE `student_missing_requirements` (
-  `id` int NOT NULL,
-  `student_id` int NOT NULL,
-  `subject_id` int NOT NULL,
-  `missing_requirement` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `flagged_by_teacher` int NOT NULL,
-  `flagged_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `studid` int NOT NULL,
-  `remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `missing_requirement` text NOT NULL,
+  `flagged_by_teacher` int(11) NOT NULL,
+  `flagged_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `studid` int(11) NOT NULL,
+  `remarks` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `student_missing_requirements`
+--
+
+INSERT INTO `student_missing_requirements` (`id`, `student_id`, `subject_id`, `missing_requirement`, `flagged_by_teacher`, `flagged_at`, `studid`, `remarks`) VALUES
+(17, 0, 0, 'asd', 9, '2025-10-24 11:13:10', 0, ''),
+(18, 0, 0, '\r\n', 9, '2025-10-25 04:49:17', 0, '');
 
 -- --------------------------------------------------------
 
@@ -263,12 +353,12 @@ CREATE TABLE `student_missing_requirements` (
 --
 
 CREATE TABLE `student_users` (
-  `id` int NOT NULL,
-  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `course` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `course` varchar(50) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `s_image` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -288,7 +378,8 @@ INSERT INTO `student_users` (`id`, `name`, `course`, `email`, `password`, `s_ima
 (39, 'Severina Gomburza', '1', 'severinagomburza@school.edu', '$2y$10$9E4xB9LyFleY3MJ6zxCzo.6k9ER1ZlnQi7qLVRwFSYYZuAQ4LhbUG', ''),
 (40, 'Damiana Malvar', '1', 'damianamalvar@school.edu', '$2y$10$Ie7xyQ4OmXzhJhU0SjtAJ.3/H8hEX36M/iqMWsaYIAhNQjceKUITu', ''),
 (41, 'Throy Tower', '1', 'tgenesistroy@gmail.com', '$2y$10$PJCze8rCgUDxcRkobXpQSuYRRcZQser57CeuXs7CcdTB8ldoiQH56', NULL),
-(42, 'Monique Erezo', '1', 'moniqueerezo98@gmail.com', '$2y$10$HGrps04BhTg6raTJQn052eqtJoITEHvYj3FtFi2X0n3sRmoZ30KDa', NULL);
+(42, 'Monique Erezo', '1', 'moniqueerezo98@gmail.com', '$2y$10$HGrps04BhTg6raTJQn052eqtJoITEHvYj3FtFi2X0n3sRmoZ30KDa', NULL),
+(43, 'Laurence Calipara', '6', 'lauicali@gmail.com', '$2y$10$zctlIJPmE6fB/.Rbjc4eQeMtPupFjIIraGj9jBpJ5SdyVxyTldah.', NULL);
 
 -- --------------------------------------------------------
 
@@ -297,18 +388,18 @@ INSERT INTO `student_users` (`id`, `name`, `course`, `email`, `password`, `s_ima
 --
 
 CREATE TABLE `subjects` (
-  `s_id` int NOT NULL,
-  `s_semester` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_course_code` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_descriptive_title` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_nth` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_units` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_lee` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_lab` int NOT NULL DEFAULT '0',
-  `s_covered_qualification` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_pre_requisite` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_year_level` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_course` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `s_id` int(11) NOT NULL,
+  `s_semester` text NOT NULL,
+  `s_course_code` text NOT NULL,
+  `s_descriptive_title` text NOT NULL,
+  `s_nth` text NOT NULL,
+  `s_units` text NOT NULL,
+  `s_lee` text NOT NULL,
+  `s_lab` int(11) NOT NULL DEFAULT 0,
+  `s_covered_qualification` text NOT NULL,
+  `s_pre_requisite` text NOT NULL,
+  `s_year_level` text NOT NULL,
+  `s_course` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -467,13 +558,13 @@ INSERT INTO `subjects` (`s_id`, `s_semester`, `s_course_code`, `s_descriptive_ti
 --
 
 CREATE TABLE `teachers` (
-  `t_id` int NOT NULL,
-  `t_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `t_user_name` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `t_password` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `t_gender` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `status` int NOT NULL DEFAULT '0',
-  `t_image` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `t_id` int(11) NOT NULL,
+  `t_name` text NOT NULL,
+  `t_user_name` text NOT NULL,
+  `t_password` text NOT NULL,
+  `t_gender` text NOT NULL,
+  `status` int(11) NOT NULL DEFAULT 0,
+  `t_image` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -484,7 +575,7 @@ INSERT INTO `teachers` (`t_id`, `t_name`, `t_user_name`, `t_password`, `t_gender
 (2, 'Angel Seclon', 'angel@gmail.com', 'angel231', 'female', 0, 'img_67c1f2ad0b85e3.30140365.jpg'),
 (4, 'Bing Bong Abarca', 'bong@gmail.com', 'bong123', 'male', 0, 'img_67c424352b44e9.83923320.jpg'),
 (7, 'Genda Necio', 'genda@gmail.com', 'genda123', 'female', 0, 'img_67c531dc4c17f3.71495902.jpg'),
-(9, 'Angel Abellanosa', 'rjbrion', '2213', 'male', 1, ''),
+(9, 'Angel Abellanosa', 'rjbrion', '2213', 'male', 0, ''),
 (10, 'Joel Miller Go', 'joel123', '2213', 'male', 0, '');
 
 -- --------------------------------------------------------
@@ -494,40 +585,40 @@ INSERT INTO `teachers` (`t_id`, `t_name`, `t_user_name`, `t_password`, `t_gender
 --
 
 CREATE TABLE `teacher_subjects` (
-  `id` int NOT NULL,
-  `teacher_id` int NOT NULL,
-  `subject_id` int NOT NULL,
-  `course` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `section` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `year_level` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `semester` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `school_year` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `assigned_date` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `schedule_day` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `course` varchar(50) NOT NULL,
+  `section` varchar(50) NOT NULL,
+  `year_level` varchar(100) NOT NULL,
+  `semester` varchar(100) NOT NULL,
+  `school_year` text NOT NULL,
+  `assigned_date` text NOT NULL,
+  `schedule_day` varchar(255) NOT NULL,
   `schedule_time_start` time NOT NULL,
   `schedule_time_end` time NOT NULL,
-  `room_id` int DEFAULT NULL,
-  `m` int DEFAULT NULL,
-  `t` int DEFAULT NULL,
-  `w` int DEFAULT NULL,
-  `th` int DEFAULT NULL,
-  `f` int DEFAULT NULL,
-  `s` int DEFAULT NULL,
-  `ss` int DEFAULT NULL,
-  `m_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `t_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `w_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `th_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `f_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `s_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `ss_start` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `m_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `t_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `w_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `th_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `f_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `s_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `ss_end` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `room_id` int(11) DEFAULT NULL,
+  `m` int(11) DEFAULT NULL,
+  `t` int(11) DEFAULT NULL,
+  `w` int(11) DEFAULT NULL,
+  `th` int(11) DEFAULT NULL,
+  `f` int(11) DEFAULT NULL,
+  `s` int(11) DEFAULT NULL,
+  `ss` int(11) DEFAULT NULL,
+  `m_start` varchar(255) DEFAULT NULL,
+  `t_start` varchar(255) DEFAULT NULL,
+  `w_start` varchar(255) DEFAULT NULL,
+  `th_start` varchar(255) DEFAULT NULL,
+  `f_start` varchar(255) DEFAULT NULL,
+  `s_start` varchar(255) DEFAULT NULL,
+  `ss_start` varchar(255) DEFAULT NULL,
+  `m_end` varchar(255) NOT NULL,
+  `t_end` varchar(255) NOT NULL,
+  `w_end` varchar(255) NOT NULL,
+  `th_end` varchar(255) NOT NULL,
+  `f_end` varchar(255) NOT NULL,
+  `s_end` varchar(255) NOT NULL,
+  `ss_end` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -550,11 +641,11 @@ INSERT INTO `teacher_subjects` (`id`, `teacher_id`, `subject_id`, `course`, `sec
 --
 
 CREATE TABLE `teacher_subject_enrollees` (
-  `id` int NOT NULL,
-  `student_id` int NOT NULL,
-  `teacher_subject_id` int NOT NULL,
-  `read_flg` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `teacher_subject_id` int(11) NOT NULL,
+  `read_flg` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `teacher_subject_enrollees`
@@ -575,9 +666,9 @@ INSERT INTO `teacher_subject_enrollees` (`id`, `student_id`, `teacher_subject_id
 --
 
 CREATE TABLE `web_users` (
-  `web_id` int NOT NULL,
-  `email` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `usertype` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
+  `web_id` int(11) NOT NULL,
+  `email` text NOT NULL,
+  `usertype` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -625,12 +716,6 @@ ALTER TABLE `criteria_note_records`
 -- Indexes for table `grading_criteria`
 --
 ALTER TABLE `grading_criteria`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `released_grades`
---
-ALTER TABLE `released_grades`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -698,91 +783,85 @@ ALTER TABLE `web_users`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `a_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `a_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `criteria_grades`
 --
 ALTER TABLE `criteria_grades`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=115;
 
 --
 -- AUTO_INCREMENT for table `criteria_note_records`
 --
 ALTER TABLE `criteria_note_records`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `grading_criteria`
 --
 ALTER TABLE `grading_criteria`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
-
---
--- AUTO_INCREMENT for table `released_grades`
---
-ALTER TABLE `released_grades`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT for table `student_grades`
 --
 ALTER TABLE `student_grades`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=197;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=197;
 
 --
 -- AUTO_INCREMENT for table `student_grades_v2`
 --
 ALTER TABLE `student_grades_v2`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `student_missing_requirements`
 --
 ALTER TABLE `student_missing_requirements`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `student_users`
 --
 ALTER TABLE `student_users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `subjects`
 --
 ALTER TABLE `subjects`
-  MODIFY `s_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
+  MODIFY `s_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=147;
 
 --
 -- AUTO_INCREMENT for table `teachers`
 --
 ALTER TABLE `teachers`
-  MODIFY `t_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `t_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `teacher_subjects`
 --
 ALTER TABLE `teacher_subjects`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `teacher_subject_enrollees`
 --
 ALTER TABLE `teacher_subject_enrollees`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `web_users`
 --
 ALTER TABLE `web_users`
-  MODIFY `web_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `web_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables
