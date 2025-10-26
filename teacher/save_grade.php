@@ -84,6 +84,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'enrollee_id' => $enrolleeId
     ]);
 
+    $adminEmails = [];
+    $adminQuery = $conn->query("SELECT a_user_name FROM admin");
+    while ($adminRow = $adminQuery->fetch_assoc()) {
+        // verify email format
+        if (filter_var($adminRow['a_user_name'], FILTER_VALIDATE_EMAIL)) {
+            $adminEmails[] = $adminRow['a_user_name'];
+        }
+    }
+
+    // for mailer purpose
+
     echo json_encode([
         'score_id' => $scoreId,
         'raw_score' => $rawScore,
