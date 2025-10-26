@@ -456,4 +456,19 @@ class myTools
         $subjectData = $conn->query("SELECT * FROM teacher_subjects WHERE id = '$teacher_subject_id'")->fetch_assoc();
         return $subjectData ?? null;
     }
+
+    public static function getSubjectByTeacherSubjectId($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $teacher_subject_id = $params['teacher_subject_id'] ?? null;
+
+        if (!$conn || !$teacher_subject_id) {
+
+            return [];
+        }
+
+        $query = $conn->query("SELECT s.s_course_code as course_code, s.s_descriptive_title as description, s.s_units as units from teacher_subjects ts join subjects s on s.s_id = ts.subject_id where ts.id = '$teacher_subject_id' limit 1")->fetch_assoc() ?? [];
+
+        return $query;
+    }
 }

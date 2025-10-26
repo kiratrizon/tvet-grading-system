@@ -367,19 +367,6 @@ if (!empty($criteria)) {
             // alert("lasjdlaksdjalkdjalskdj");
             // let table = new DataTable("#teacherTable");
 
-            $(".flag-lr").click(function() {
-                var studentId = $(this).data("student-id");
-                var subjectId = $(this).data("subject-id");
-                var studid = $(this).data("studid");
-                var studremarks = $(this).data("studremarks");
-                // alert(studentId);
-                // alert(subjectId);
-                $("#student_id").val(studentId);
-                $("#subject_id").val(subjectId);
-                $("#studid").val(studid);
-                $("#studremarks").val(studremarks);
-            });
-
             $("#navStudents").click(function(e) {
                 e.preventDefault();
                 $("#studentsTable").show();
@@ -460,51 +447,21 @@ if (!empty($criteria)) {
                         Object.entries(periods).forEach(([key, label]) => {
                             coveredSelect.append(`<option value="${key}">${label}</option>`);
                         });
+                        $("#addGradesModal").modal("show"); // show Bootstrap modal
                     },
+                    error: function(xhr) {
+                        const msg = xhr.responseText ?? "This action is temporarily unavailable.";
+                        Swal.fire({
+                            title: "Error!",
+                            icon: "warning",
+                            text: msg,
+                            confirmButton: false,
+                            timer: 2000
+                        })
+                    }
                 })
-                $("#addGradesModal").modal("show"); // show Bootstrap modal
             });
 
-            document.getElementById("rating").addEventListener("input", function() {
-                let rating = parseFloat(this.value);
-                let remarksField = document.getElementById("remarks");
-
-                if (isNaN(rating)) {
-                    remarksField.value = "";
-                    return;
-                }
-
-                if (rating >= 1.00 && rating <= 3.00) {
-                    remarksField.value = "Passed";
-                } else if (rating > 3.00 && rating <= 4.00) {
-                    remarksField.value = "Conditional";
-                } else if (rating > 4.00 && rating <= 5.00) {
-                    remarksField.value = "Failed";
-                } else {
-                    remarksField.value = "Incomplete";
-                }
-            });
-
-
-            document.getElementById("adfinalRating").addEventListener("input", function() {
-                let rating = parseFloat(this.value);
-                let remarksField = document.getElementById("adremarks");
-
-                if (isNaN(rating)) {
-                    remarksField.value = "";
-                    return;
-                }
-
-                if (rating >= 1.00 && rating <= 3.00) {
-                    remarksField.value = "Passed";
-                } else if (rating > 3.00 && rating <= 4.00) {
-                    remarksField.value = "Conditional";
-                } else if (rating > 4.00 && rating <= 5.00) {
-                    remarksField.value = "Failed";
-                } else {
-                    remarksField.value = "Invalid Grade";
-                }
-            });
 
             $(document).on('shown.bs.tab', '[data-bs-target^="#"]', function(e) {
                 const periodPane = $($(this).data('bs-target')); // e.g. #prelim
