@@ -4,7 +4,7 @@ require_once '../config/myTools.php';
 
 $params = [];
 
-$params['header'] = ['student_id'];
+$params['headers'] = ['student_id'];
 $params['title'] = 'Sample Student Enrollment Template';
 $params['filename'] = 'student_enrollment_template.xlsx';
 myTools::exportExcelTemplate($params);
