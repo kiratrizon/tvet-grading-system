@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         http_response_code(404);
         exit;
     }
-    $percentageOfCriterion = $percentageOfCriterion['percentage'];
+    $percentageOfCriterion = (float)$percentageOfCriterion['percentage'];
     // fetch the id from criteria_note_records using criterionId; this is like total activities
     $cnr = $conn->query("SELECT * FROM criteria_note_records WHERE grading_criterion_id = '$criterionId' and period = '$period';")->fetch_all(MYSQLI_ASSOC);
     if (!$cnr) {
