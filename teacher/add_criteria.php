@@ -66,7 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['error'] = "Error Adding Criteria";
             header("location: add_criteria.php?ts_id=$ts_id");
             exit;
-            continue; // Skip invalid entries
         }
 
         if ($criteria_id > 0) {
