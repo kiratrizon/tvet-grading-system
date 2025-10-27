@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // get all ids to determine which to delete
     $existingCriteriaIds = $conn->query("SELECT id FROM grading_criteria WHERE teacher_subject_id = '$ts_id'")->fetch_all(MYSQLI_ASSOC);
-    $existingIdsArray = array_map(function($item) {
+    $existingIdsArray = array_map(function ($item) {
         return $item['id'];
     }, $existingCriteriaIds);
     // array diff to find which ids to delete
@@ -63,6 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $criteria_id = (int) $criteria_ids[$index];
 
         if (empty($name) || $percent <= 0 || $percent > 100) {
+            $_SESSION['error'] = "Error Adding Criteria";
+            header("location: add_criteria.php?ts_id=$ts_id");
+            exit;
             continue; // Skip invalid entries
         }
 
@@ -119,22 +122,22 @@ $existingCriteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_s
                 <div class="message-wrapper">
                     <?php if (isset($_SESSION['error'])): ?>
                         <div class="text-center alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>Warning!</strong> <br> <?= $_SESSION['error'] ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <strong>Warning!</strong> <br> <?= $_SESSION['error'] ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                         <?php unset($_SESSION['error']); ?>
                     <?php endif; ?>
 
                     <?php if (isset($_SESSION['success'])): ?>
                         <div class="text-center alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Success!</strong> <br> <?= $_SESSION['success'] ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <strong>Success!</strong> <br> <?= $_SESSION['success'] ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                         <?php unset($_SESSION['success']); ?>
                     <?php endif; ?>
                 </div>
 
-                
+
                 <!-- ✅ GRADING CRITERIA -->
                 <div class="my-4">
                     <h3 class="mb-3">Grading Criteria | <?= $teacherSubject['course_code'] . ' - ' . $teacherSubject['description'] ?></h3>
@@ -152,30 +155,30 @@ $existingCriteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_s
                                         <!-- Hidden ID field -->
                                         <input type="hidden" name="criteria_id[]" value="<?= (int) $criteria['id'] ?>">
 
-                                        <input type="text" 
-                                            name="criteria_name[]" 
-                                            class="form-control me-2" 
-                                            placeholder="Criteria name (e.g. Quizzes)" 
-                                            value="<?= htmlspecialchars($criteria['criteria_name']) ?>" 
+                                        <input type="text"
+                                            name="criteria_name[]"
+                                            class="form-control me-2"
+                                            placeholder="Criteria name (e.g. Quizzes)"
+                                            value="<?= htmlspecialchars($criteria['criteria_name']) ?>"
                                             required>
-                                        
-                                        <input type="number" 
-                                            name="criteria_percent[]" 
-                                            class="form-control me-2" 
-                                            placeholder="%" 
-                                            min="1" 
-                                            max="100" 
-                                            value="<?= htmlspecialchars($criteria['percentage']) ?>" 
+
+                                        <input type="number"
+                                            name="criteria_percent[]"
+                                            class="form-control me-2"
+                                            placeholder="%"
+                                            min="1"
+                                            max="100"
+                                            value="<?= htmlspecialchars($criteria['percentage']) ?>"
                                             required>
 
                                         <button type="button" class="btn btn-danger remove-criteria" value="<?= (int) $criteria['id'] ?>">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     </div>
-                            <?php
+                                <?php
                                 endforeach;
                             else:
-                            ?>
+                                ?>
                                 <!-- Default empty row if no existing criteria -->
                                 <div class="criteria-item d-flex align-items-center mb-3">
                                     <input type="hidden" name="criteria_id[]" value="0">
@@ -203,7 +206,7 @@ $existingCriteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_s
     <script>
         $(document).ready(function() {
             // Add new criteria row
-            $("#addCriteria").on("click", function () {
+            $("#addCriteria").on("click", function() {
                 const newItem = `
                     <div class="criteria-item d-flex align-items-center mb-3">
                         <input type="hidden" name="criteria_id[]" value="0">
@@ -216,7 +219,7 @@ $existingCriteria = $conn->query("SELECT * FROM grading_criteria WHERE teacher_s
 
             // Remove a criteria row
             $(document).on('click', '.remove-criteria', function() {
-                if ($(this).val() != 0){
+                if ($(this).val() != 0) {
                     Swal.fire({
                         title: 'Are you sure?',
                         text: "This criteria might be in use in existing student grades.",
