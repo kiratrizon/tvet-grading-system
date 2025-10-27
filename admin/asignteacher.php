@@ -2,6 +2,7 @@
 
 session_start();
 require_once  '../config/conn.php';
+require_once  '../config/myTools.php';
 
 $courses = $conn->query("SELECT DISTINCT subjects.s_course,
     courses.course_name 
@@ -12,6 +13,27 @@ $courses2 = $conn->query("SELECT DISTINCT subjects.s_course,
     courses.course_name 
     FROM subjects 
     JOIN courses ON subjects.s_course = courses.id");
+
+$weekdays = [
+    1 => 'Monday',
+    2 => 'Tuesday',
+    3 => 'Wednesday',
+    4 => 'Thursday',
+    5 => 'Friday',
+    6 => 'Saturday',
+    7 => 'Sunday',
+];
+
+$weekdaysWithPrefixes = [
+    1 => 'm_',
+    2 => 't_',
+    3 => 'w_',
+    4 => 'th_',
+    5 => 'f_',
+    6 => 's_',
+    7 => 'ss_'
+];
+
 
 
 function formatSchedule($schedule_days, $schedule_times)
@@ -42,21 +64,13 @@ $assignTeachers = $conn->query("
         subjects.s_descriptive_title, 
         subjects.s_course, 
         subjects.s_course_code, 
-        teacher_subjects.course, 
-        teacher_subjects.year_level, 
-        teacher_subjects.id, 
-        teacher_subjects.subject_id, 
-        teacher_subjects.teacher_id, 
-        teacher_subjects.semester,
-        teacher_subjects.school_year,
-        teacher_subjects.assigned_date,
-        GROUP_CONCAT(DISTINCT CONCAT(teacher_subjects.schedule_day, ' ', TIME_FORMAT(teacher_subjects.schedule_time_start, '%h:%i %p'), ' - ', TIME_FORMAT(teacher_subjects.schedule_time_end, '%h:%i %p')) ORDER BY teacher_subjects.schedule_day ASC SEPARATOR '<br>') AS schedule_details
+        teacher_subjects.*
     FROM teacher_subjects
     JOIN teachers ON teacher_subjects.teacher_id = teachers.t_id
     JOIN subjects ON teacher_subjects.subject_id = subjects.s_id 
     GROUP BY teachers.t_name, subjects.s_course_code, subjects.s_descriptive_title, teacher_subjects.course, teacher_subjects.year_level, teacher_subjects.semester, teacher_subjects.school_year
     ORDER BY teachers.t_name ASC
-");
+")->fetch_all(MYSQLI_ASSOC);
 
 $year = date("Y");
 $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year + 2)]];
@@ -92,6 +106,10 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
 
         span.select2.select2-container.select2-container--default {
             width: 100% !important;
+        }
+
+        i {
+            pointer-events: none;
         }
     </style>
 </head>
@@ -160,15 +178,26 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
                         </thead>
                         <tbody>
                             <?php $row_count = 1; ?>
-                            <?php foreach ($assignTeachers as $assign): ?>
+                            <?php foreach ($assignTeachers as $assign):
+                                // myTools::display($assign);
+                            ?>
                                 <tr>
                                     <td style="font-size: 14px;"><?= $row_count; ?></td>
                                     <td style="font-size: 14px; text-transform:capitalize"><?= $assign['t_name'] ?></td>
                                     <td style="font-size: 14px;"><?= $assign['s_course_code'] ?></td>
                                     <td style="line-height: 1; font-size: 14px"><?= nl2br(wordwrap($assign['s_descriptive_title'], 30, "<br>\n")) ?></td>
                                     <td style="font-size: 14px;">
-                                        <?= nl2br($assign['schedule_details']) ?>
+                                        <?php foreach ($weekdaysWithPrefixes as $key => $prefix) {
+                                            $startKey = $prefix . 'start';
+                                            $endKey = $prefix . 'end';
+                                            $start = !empty($assign[$startKey]) ? date("h:i A", strtotime($assign[$startKey])) : '';
+                                            $end   = !empty($assign[$endKey]) ? date("h:i A", strtotime($assign[$endKey])) : '';
+                                            if (!empty($start) && !empty($end)) { ?>
+                                                <div><?= $weekdays[$key] . 's ' . $start . ' - ' . $end ?></div>
+                                        <?php }
+                                        } ?>
                                     </td>
+
 
                                     <td>
                                         <div class="action">
@@ -256,15 +285,15 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
                             </div>
 
                             <div class="form-group w-100">
-                            <label for="sy">School Year:</label>
-                            <select id="sy" name="sy" class="form-control">
-                                <option value="" selected disabled>Select School Year</option>
-                                <?php foreach ($schoolyears as $sy) {
+                                <label for="sy">School Year:</label>
+                                <select id="sy" name="sy" class="form-control">
+                                    <option value="" selected disabled>Select School Year</option>
+                                    <?php foreach ($schoolyears as $sy) {
                                         $val = join('-', $sy);
-                                ?>
-                                    <option value="<?= $val ?>"><?= $val ?></option>
-                                <?php } ?>
-                            </select>
+                                    ?>
+                                        <option value="<?= $val ?>"><?= $val ?></option>
+                                    <?php } ?>
+                                </select>
                             </div>
 
                             <div class="form-group w-100">
@@ -284,15 +313,40 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
                                         <th>Day</th>
                                         <th>Start Time</th>
                                         <th>End Time</th>
-                                        <th>Section</th>
+                                        <th>Room</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <!-- Dito mag-a-append ng schedule rows dynamically -->
+                                    <?php foreach ($weekdays as $key => $weekday) { ?>
+                                        <tr>
+                                            <td>
+                                                <p><?= $weekday ?></p>
+                                            </td>
+                                            <td>
+                                                <input type="time" name="schedule_time_start_<?= $key ?>" class="form-control" readonly id="schedule_time_start_<?= $key ?>">
+                                            </td>
+                                            <td>
+                                                <input type="time" name="schedule_time_end_<?= $key ?>" class="form-control" readonly id="schedule_time_end_<?= $key ?>">
+                                            </td>
+                                            <td>
+                                                <input type="text" name="room_<?= $key ?>" class="form-control" placeholder="Room" readonly id="room_<?= $key ?>">
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-success btn-sm" id="include_<?= $key ?>">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-danger btn-sm d-none" id="exclude_<?= $key ?>">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+
+                                            </td>
+
+                                        </tr>
+                                    <?php } ?>
                                 </tbody>
                             </table>
-                            <button type="button" id="add_schedule" class="btn btn-secondary mb-3">+ Add Schedule</button>
+                            <!-- <button type="button" id="add_schedule" class="btn btn-secondary mb-3">+ Add Schedule</button> -->
                         </div>
 
                         <div>
@@ -641,39 +695,44 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
                 }
             });
 
+
+            // When INCLUDE button is clicked
+            $("button[id^='include_']").on('click', function() {
+                const id = $(this).attr('id');
+                const index = id.split('_')[1];
+                const startId = `#schedule_time_start_${index}`;
+                const endId = `#schedule_time_end_${index}`;
+                const roomId = `#room_${index}`;
+                const excludeId = `#exclude_${index}`;
+
+                $(startId).prop('required', true).prop('readonly', false);
+                $(endId).prop('required', true).prop('readonly', false);
+                $(roomId).prop('readonly', false);
+
+                $(this).addClass('d-none');
+                $(excludeId).removeClass('d-none');
+            });
+
+            // When EXCLUDE button is clicked
+            $("button[id^='exclude_']").on('click', function() {
+                const id = $(this).attr('id');
+                const index = id.split('_')[1];
+                const startId = `#schedule_time_start_${index}`;
+                const endId = `#schedule_time_end_${index}`;
+                const roomId = `#room_${index}`;
+                const includeId = `#include_${index}`;
+
+                $(startId).prop('required', false).prop('readonly', true).val('');
+                $(endId).prop('required', false).prop('readonly', true).val('');
+                $(roomId).prop('readonly', true).val('');
+
+                $(this).addClass('d-none');
+                $(includeId).removeClass('d-none');
+            });
+
         });
     </script>
     <script>
-        document.getElementById('add_schedule').addEventListener('click', function() {
-            let tableBody = document.querySelector('#scheduleTable tbody');
-            let row = document.createElement('tr');
-            row.innerHTML = `
-            <td>
-                <select name="schedule_day[]" class="form-control">
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                </select>
-            </td>
-            <td>
-                <input type="time" name="schedule_time_start[]" class="form-control" required>
-            </td>
-            <td>
-                <input type="time" name="schedule_time_end[]" class="form-control" required>
-            </td>
-            <td>
-                <input type="text" name="schedule_section[]" class="form-control" placeholder="Section">
-            </td>
-            <td>
-                <button type="button" class="btn btn-danger remove-row">Remove</button>
-            </td>
-            `;
-            tableBody.appendChild(row);
-        });
-
         // Remove row event
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-row')) {

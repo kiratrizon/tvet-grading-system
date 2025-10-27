@@ -16,11 +16,7 @@ $assignTeachers = $conn->query("SELECT
         subjects.s_course_code, 
         subjects.s_year_level, 
         subjects.s_semester, 
-        teacher_subjects.course, 
-        teacher_subjects.year_level, 
-        teacher_subjects.semester,
-        teacher_subjects.school_year,
-        teacher_subjects.section
+        teacher_subjects.*
     FROM teacher_subjects
     JOIN teachers ON teacher_subjects.teacher_id = teachers.t_id
     JOIN subjects ON teacher_subjects.subject_id = subjects.s_id
