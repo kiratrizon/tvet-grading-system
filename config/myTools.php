@@ -189,6 +189,8 @@ class myTools
         if (empty($headers)) {
             return false;
         }
+        $title = preg_replace('/[:\\\\\\/\\?\\*\\[\\]]/', '', $title); // remove invalid chars
+        $title = mb_substr($title, 0, 31); // limit to 31 chars
         // Create new Spreadsheet
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
