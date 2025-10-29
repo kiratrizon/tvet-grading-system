@@ -63,7 +63,7 @@ $row_count = 1;
     <link rel="stylesheet" href="../public/fonts/css/all.min.css">
     <link rel="stylesheet" href="../public/style/loading.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <title>Courses</title>
+    <title>Programs</title>
 </head>
 
 <body>
@@ -84,7 +84,7 @@ $row_count = 1;
                     data-bs-toggle="modal"
                     data-bs-target="#course">
                     <i class="fa fa-plus-circle"></i>
-                    Add Course
+                    Add Program
                 </button>
 
                 <div class="card shadow p-5 mt-4">
@@ -92,8 +92,8 @@ $row_count = 1;
                         <thead class="table-dark">
                             <tr>
                                 <th>#</th>
-                                <th>Course Code</th>
-                                <th>Course Name</th>
+                                <th>Program Abbreviation</th>
+                                <th>Program Name</th>
                                 <th>Action</th>
                             </tr>
                         </thead>

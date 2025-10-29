@@ -141,7 +141,7 @@ $teacher = $assignTeachers->fetch_assoc();
                                     <th>Day</th>
                                     <th>Start Time</th>
                                     <th>End Time</th>
-                                    <th>Section</th>
+                                    <th>Room</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>

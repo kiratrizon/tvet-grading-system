@@ -190,10 +190,10 @@ if (!empty($criteria)) {
                         </li>
                         <?php if (!empty($criteria)): ?>
                             <li class="nav-item">
-                                <a id="navAddGrades" class="nav-link" href="#">Add Grades</a>
+                                <a id="navAddGrades" class="nav-link" href="#">Set Criteria</a>
                             </li>
                             <li class="nav-item">
-                                <a id="navGrades" class="nav-link" href="#">Show Grades</a>
+                                <a id="navGrades" class="nav-link" href="#">Compute Grades</a>
                             </li>
                         <?php endif; ?>
                     </ul>
@@ -222,7 +222,7 @@ if (!empty($criteria)) {
                                             <td><?= htmlspecialchars($criterion['criteria_name']) ?></td>
                                             <td><?= htmlspecialchars($criterion['percentage']) ?>%</td>
                                             <td>
-                                                <button class="btn btn-primary add-grades" value="<?= htmlspecialchars($criterion['id']) ?>">Add Grades</button>
+                                                <button class="btn btn-primary add-grades" value="<?= htmlspecialchars($criterion['id']) ?>">Add Assessments</button>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -302,7 +302,7 @@ if (!empty($criteria)) {
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addGradesModalLabel">Add Grades</h5>
+                    <h5 class="modal-title" id="addGradesModalLabel">Set Criteria</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">

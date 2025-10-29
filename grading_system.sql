@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: db
--- Generation Time: Oct 26, 2025 at 08:32 AM
+-- Generation Time: Oct 25, 2025 at 11:52 PM
 -- Server version: 8.0.43
 -- PHP Version: 8.3.26
 
@@ -274,9 +274,9 @@ INSERT INTO `grading_criteria` (`id`, `teacher_subject_id`, `criteria_name`, `pe
 
 CREATE TABLE `periods` (
   `id` int NOT NULL,
-  `label` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `label` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `weight` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `periods`
@@ -297,7 +297,7 @@ CREATE TABLE `released_grades` (
   `id` int NOT NULL,
   `period` int NOT NULL,
   `teacher_subject_id` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `released_grades`

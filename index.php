@@ -156,7 +156,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <script src="public/js/loading.js"></script>
 
-    <script>
+    <!-- <script>
         function createBubble() {
             const bubble = document.createElement("img");
             bubble.classList.add("bubble");
@@ -193,7 +193,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             yoyo: true,
             ease: "power1.inOut"
         });
-    </script>
+    </script> -->
 
 </body>
 

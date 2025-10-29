@@ -14,7 +14,7 @@
                 </a>
                 <ul class="submenu">
                     <li><a href="subjects.php"><i class="fa-solid fa-book"></i> Subjects</a></li>
-                    <li><a href="courses.php"><i class="fa-solid fa-graduation-cap"></i> Courses</a></li>
+                    <li><a href="courses.php"><i class="fa-solid fa-graduation-cap"></i> Programs</a></li>
                 </ul>
             </li>
             <li class="has-submenu">

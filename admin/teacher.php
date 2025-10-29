@@ -37,7 +37,7 @@ $row_count = 1;
     <link rel="stylesheet" href="../public/fonts/css/all.min.css">
     <link rel="stylesheet" href="../public/style/loading.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <title>Teachers</title>
+    <title>Instructors</title>
 </head>
 
 <body>
@@ -71,7 +71,7 @@ $row_count = 1;
 
                 <?php if (isset($_SESSION['success'])): ?>
                     <div class="text-center alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Success!</strong> <br> Teacher Added Successfully!.
+                        <strong>Success!</strong> <br> Instructor Added Successfully!.
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     <?php unset($_SESSION['success']); ?>
@@ -79,7 +79,7 @@ $row_count = 1;
 
                 <?php if (isset($_SESSION['updated'])): ?>
                     <div class="text-center alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Success!</strong> <br> Teacher Updated Successfully!.
+                        <strong>Success!</strong> <br> Instructor Updated Successfully!.
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                     <?php unset($_SESSION['updated']); ?>
@@ -155,7 +155,7 @@ $row_count = 1;
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitleId">
-                        Add Teacher
+                        Add Instructor
                     </h5>
                     <button
                         type="button"
@@ -228,7 +228,7 @@ $row_count = 1;
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitleId">
-                        View Teacher Details
+                        View Instructor Details
                     </h5>
                     <button
                         type="button"
