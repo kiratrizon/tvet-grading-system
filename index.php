@@ -67,6 +67,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     exit;
                 }
             }
+        } else {
+            // Deactivated teacher (usertype not 't') cannot log in
+            $error = 1;
         }
     }
 

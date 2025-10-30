@@ -3,7 +3,7 @@
         <ul class="navigation">
             <li><a href="index.php"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
             <li><a href="teacher.php"><i class="fa-solid fa-chalkboard-teacher"></i>Instructor</a></li>
-            <li><a href="asignteacher.php"><i class="fa-solid fa-user-tag"></i> Assign to Instructor</a></li>
+            <li><a href="asignteacher.php"><i class="fa-solid fa-user-tag"></i> Assign Courses</a></li>
             <li class="has-submenu">
                 <a href="#" class="submenu-toggle">
                     <div>
@@ -13,7 +13,7 @@
                     <i class="fa-solid fa-chevron-down"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="subjects.php"><i class="fa-solid fa-book"></i> Subjects</a></li>
+                    <li><a href="subjects.php"><i class="fa-solid fa-book"></i> Courses</a></li>
                     <li><a href="courses.php"><i class="fa-solid fa-graduation-cap"></i> Programs</a></li>
                 </ul>
             </li>
@@ -26,7 +26,9 @@
                     <i class="fa-solid fa-chevron-down"></i>
                 </a>
                 <ul class="submenu">
-                    <li><a href="students.php"><i class="fa-solid fa-calculator"></i> Student Grades</a></li>
+                    <li><a href="students.php"><i class="fa-solid fa-magnifying-glass"></i> Search Student Grades</a></li>
+                    <li><a href="print_grades.php"><i class="fa-solid fa-print"></i> Print Grades</a></li>
+                    <li><a href="subject_grades.php"><i class="fa-solid fa-clipboard-list"></i> Course Grades</a></li>
                     <li><a href="students_add.php"><i class="fa-solid fa-user-plus"></i> Add Student</a></li>
                 </ul>
             </li>

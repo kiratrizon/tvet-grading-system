@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
 
     if (!in_array($_FILES['file']['type'], $allowedTypes)) {
         $_SESSION['error'] = "Invalid file type. Please upload an Excel file.";
-        header("Location: mysubjects.php?subject=" . urlencode($subject_code));
+        header("Location: students_add.php");
         exit();
     }
 
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['file'])) {
 
         if ($data[0] !== $expectedHeaders) {
             $_SESSION['error'] = "Invalid file format. Please use the correct template.";
-            header("Location: mysubjects.php?subject=" . urlencode($subject_code));
+            header("Location: students_add.php");
             exit();
         }
 

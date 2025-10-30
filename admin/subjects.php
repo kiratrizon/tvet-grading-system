@@ -114,10 +114,23 @@ $result = $conn->query("
                 }
                 ?>
 
+                <!-- Simple Search -->
+                <div class="card p-3 mb-3">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-6">
+                            <label class="form-label">Search Subjects</label>
+                            <input type="text" id="subjectSearch" class="form-control" placeholder="Type course code or title...">
+                        </div>
+                        <div class="col-md-6 text-muted small">
+                            Matches across all tables; showing only sections with results.
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Filter Buttons -->
                 <div class="filter-buttons">
                     <div class="d-flex flex-row gap-4 align-items-center mb-3">
-                        <h3 style="font-size:18px; font-weight: 600; line-height:1; margin:0">Filter by Course:</h3>
+                        <h3 style="font-size:18px; font-weight: 600; line-height:1; margin:0">Filter by Program:</h3>
                         <div class="buttons">
                             <button class="btn btn-primary filter-course" data-course="all">Show All</button>
                             <?php foreach ($subjects as $course => $years) : ?>
@@ -185,10 +198,10 @@ $result = $conn->query("
                                                             <tr>
                                                                 <td style="font-size: 14px;"><?= $courseData['s_course_code'] ?></td>
                                                                 <td style="line-height: 1; font-size: 14px"><?= nl2br(wordwrap($courseData['s_descriptive_title'], 30, "<br>\n")) ?></td>
-                                                                <td style="font-size: 14px;"><?= $courseData['s_nth'] ?></td>
-                                                                <td style="font-size: 14px;"><?= $courseData['s_units'] ?></td>
-                                                                <td style="font-size: 14px;"><?= $courseData['s_lee'] ?></td>
-                                                                <td style="font-size: 14px;"><?= $courseData['s_lab'] ?></td>
+                                                                <td style="font-size: 14px;"><?= $courseData['s_nth'] ?? '' ?></td>
+                                                                <td style="font-size: 14px;"><?= $courseData['s_units'] ?? '' ?></td>
+                                                                <td style="font-size: 14px;"><?= $courseData['s_lee'] ?? '' ?></td>
+                                                                <td style="font-size: 14px;"><?= $courseData['s_lab'] ?? '' ?></td>
                                                                 <td>
                                                                     <div class="action">
                                                                         <button type="submit" class="btn btn-primary update" data-bs-toggle="modal" data-bs-target="#editSubjects" value="<?= $courseData['s_id'] ?>">
@@ -270,13 +283,13 @@ $result = $conn->query("
 
 
                                 <div class="form-group w-100">
-                                    <label for="course">Course</label>
+                                    <label for="course">Program</label>
                                     <select name="course" id="course" class="form-control">
                                         <option selected disabled hidden>Select Course</option>
                                         <?php
-                                        $courses = $conn->query('SELECT * FROM courses');
-                                        foreach ($courses as $course): ?>
-                                            <option value="<?= $course['id'] ?>" class="form-control"><?= $course['course_name'] ?></option>
+                                        $programs = $conn->query('SELECT id, program_name FROM programs');
+                                        foreach ($programs as $program): ?>
+                                            <option value="<?= $program['id'] ?>" class="form-control"><?= $program['program_name'] ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
@@ -389,7 +402,7 @@ $result = $conn->query("
                                 </div>
 
                                 <div class="form-group w-100">
-                                    <label for="mvcourse">Course</label>
+                                    <label for="mvcourse">Program</label>
                                     <select name="course" id="mvcourse" disabled class="form-control">
                                     </select>
                                 </div>
@@ -480,14 +493,14 @@ $result = $conn->query("
                                 </div>
 
                                 <div class="form-group w-100">
-                                    <label for="mecourse">Course</label>
+                                    <label for="mecourse">Program</label>
                                     <select name="course" id="mecourse" class="form-control">
                                         <option selected disabled hidden>Select Course</option>
                                         <?php
                                         require_once '../config/conn.php';
-                                        $courses = $conn->query('SELECT * FROM courses');
-                                        foreach ($courses as $course): ?>
-                                            <option value="<?= $course['id'] ?>"><?= $course['course_name'] ?></option>
+                                        $programs = $conn->query('SELECT id, program_name FROM programs');
+                                        foreach ($programs as $program): ?>
+                                            <option value="<?= $program['id'] ?>"><?= $program['program_name'] ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
@@ -593,6 +606,39 @@ $result = $conn->query("
 
             // Initial na pag-filter, ipapakita lang ang default na course (DIT sa kasalukuyan)
             filterContent();
+
+            // Simple client-side subject search
+            $('#subjectSearch').on('input', function(){
+                const q = $(this).val().toLowerCase().trim();
+                // Show all if empty
+                if (!q) {
+                    $('.curriculum-section').show();
+                    $('.year-section').show();
+                    $('.curriculum-table').show();
+                    $('.curriculumOutline tbody tr').show();
+                    return;
+                }
+
+                // Hide everything first
+                $('.curriculumOutline tbody tr').each(function(){
+                    const rowText = $(this).text().toLowerCase();
+                    $(this).toggle(rowText.indexOf(q) !== -1);
+                });
+
+                // Hide empty tables and sections
+                $('.curriculum-table').each(function(){
+                    const anyVisible = $(this).find('tbody tr:visible').length > 0;
+                    $(this).toggle(anyVisible);
+                });
+                $('.year-section').each(function(){
+                    const anyVisible = $(this).find('.curriculum-table:visible').length > 0;
+                    $(this).toggle(anyVisible);
+                });
+                $('.curriculum-section').each(function(){
+                    const anyVisible = $(this).find('.year-section:visible').length > 0;
+                    $(this).toggle(anyVisible);
+                });
+            });
 
             // Button para sa Print,Export/ etc... Plugins
             new DataTable('.curriculumOutline', {

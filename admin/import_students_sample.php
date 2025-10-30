@@ -5,9 +5,9 @@ require_once '../config/myTools.php';
 
 $params = [];
 
-$filename = 'add_students_template.xlsx';
-$headers = ['student_email', 'student_name', 'student_program'];
-$title = 'Add Students Template';
+$filename = 'enrollment_template.xlsx';
+$headers = ['student_name', 'student_email(optional)', 'program_code', 'year_level', 'school_year'];
+$title = 'Enrollment Template';
 myTools::exportExcelTemplate([
     'headers' => $headers,
     'filename' => $filename,

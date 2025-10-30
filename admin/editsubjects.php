@@ -5,9 +5,9 @@ require_once '../config/conn.php';
 $id = $_GET['id'];
 
 $subjects = $conn->query("
-    SELECT subjects.*, courses.course_code , courses.course_name
+    SELECT subjects.*, programs.program_code AS course_code , programs.program_name AS course_name
     FROM subjects 
-    LEFT JOIN courses ON subjects.s_course = courses.id 
+    LEFT JOIN programs ON subjects.s_course = programs.id 
     WHERE subjects.s_id = $id
 ");
 

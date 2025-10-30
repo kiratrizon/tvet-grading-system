@@ -5,11 +5,11 @@ session_start();
 require_once  '../config/conn.php';
 
 
-$result = $conn->query("SELECT s_course, course_name FROM courses");
+$result = $conn->query("SELECT id, program_name FROM programs");
 $courses = [];
 
 while ($row = $result->fetch_assoc()) {
-    $courses[$row['s_course']] = $row['course_name'];
+    $courses[$row['id']] = $row['program_name'];
 }
 
 echo json_encode($courses);

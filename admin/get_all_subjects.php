@@ -16,6 +16,7 @@ data: {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
+    $q = isset($_POST['q']) ? trim($_POST['q']) : '';
     $course = isset($_POST['course']) ? $_POST['course'] : '';
     $year = isset($_POST['year']) ? $_POST['year'] : '';
     $semester = isset($_POST['semester']) ? $_POST['semester'] : '';
@@ -41,16 +42,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     $columns = [
-        'c.id as program_id',
-        'c.course_code as program',
-        'c.course_name as program_name',
+        'p.id as program_id',
+        'p.program_code as program',
+        'p.program_name as program_name',
         'ts.year_level as year_level, ts.semester as semester, ts.school_year as school_year'
     ];
 
-    $sql = "SELECT " . implode(', ', $columns) . " from teacher_subjects ts join subjects s on ts.subject_id = s.s_id join courses c on ts.course = c.id
+    $sql = "SELECT " . implode(', ', $columns) . " from teacher_subjects ts join subjects s on ts.subject_id = s.s_id join programs p on ts.course = p.id
             $whereClause
-            GROUP BY c.course_code, c.course_code, ts.year_level, ts.semester, ts.school_year
-            ORDER BY c.course_code, ts.school_year DESC, ts.year_level, ts.semester";
+            GROUP BY p.program_code, p.program_code, ts.year_level, ts.semester, ts.school_year
+            ORDER BY p.program_code, ts.school_year DESC, ts.year_level, ts.semester";
 
     /*
     Array
@@ -96,7 +97,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }, $subjectsForThisEntry);
             // find all students enrolled in these subjects
             $subjectIdsList = implode(',', $subjectIds);
-            $students = $conn->query("SELECT su.id, su.name from teacher_subject_enrollees tse join student_users su on tse.student_id = su.id where tse.teacher_subject_id IN ($subjectIdsList) group by tse.student_id order by su.name")->fetch_all(MYSQLI_ASSOC);
+            $nameLike = '';
+            if (!empty($q)) {
+                $escaped = $conn->real_escape_string($q);
+                $nameLike = " AND su.name LIKE '%$escaped%' ";
+            }
+            $students = $conn->query("SELECT su.id, su.name from teacher_subject_enrollees tse join student_users su on tse.student_id = su.id where tse.teacher_subject_id IN ($subjectIdsList) $nameLike group by tse.student_id order by su.name")->fetch_all(MYSQLI_ASSOC);
             // myTools::display($students);
             // exit;
         ?>

@@ -30,8 +30,7 @@ $(".update").click(function () {
         $("#meunits").val(msg.s_units);
         $("#melee").val(msg.s_lee);
         $("#melab").val(msg.s_lab);
-        $("#mecovered_qualification").val(msg.s_covered_qualification);
-        $("#mepre_requisite").val(msg.s_pre_requisite);
+        $("#mepre_requisite").val(msg.s_pre_requisite || '');
   })
 })
 
@@ -78,8 +77,7 @@ $(".view").click(function () {
         $("#mvunits").val(msg.s_units);
         $("#mvlee").val(msg.s_lee);
         $("#mvlab").val(msg.s_lab);
-        $("#mvcovered_qualification").val(msg.s_covered_qualification);
-        $("#mvpre_requisite").val(msg.s_pre_requisite);
+        $("#mvpre_requisite").val(msg.s_pre_requisite || '');
   })
 })
 

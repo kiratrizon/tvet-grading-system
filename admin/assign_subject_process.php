@@ -12,58 +12,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $year_level = $_POST['year_level'];
     $semester = $_POST['semester'];
     $school_year = $_POST['sy'];
-
-    $schedules = [
-        1 => ['start' => $_POST['schedule_time_start_1'] ?? null, 'end' => $_POST['schedule_time_end_1'] ?? null, 'prefix' => 'm_'],
-        2 => ['start' => $_POST['schedule_time_start_2'] ?? null, 'end' => $_POST['schedule_time_end_2'] ?? null, 'prefix' => 't_'],
-        3 => ['start' => $_POST['schedule_time_start_3'] ?? null, 'end' => $_POST['schedule_time_end_3'] ?? null, 'prefix' => 'w_'],
-        4 => ['start' => $_POST['schedule_time_start_4'] ?? null, 'end' => $_POST['schedule_time_end_4'] ?? null, 'prefix' => 'th_'],
-        5 => ['start' => $_POST['schedule_time_start_5'] ?? null, 'end' => $_POST['schedule_time_end_5'] ?? null, 'prefix' => 'f_'],
-        6 => ['start' => $_POST['schedule_time_start_6'] ?? null, 'end' => $_POST['schedule_time_end_6'] ?? null, 'prefix' => 's_'],
-        7 => ['start' => $_POST['schedule_time_start_7'] ?? null, 'end' => $_POST['schedule_time_end_7'] ?? null, 'prefix' => 'ss_'],
-    ];
+    $room = trim($_POST['room'] ?? '');
 
     $assigned_at = date('Y-m-d h:i A');
 
-    $arrangeSchedules = [];
-
-    foreach ($schedules as $key => $schedule) {
-        if (empty($schedule['start']) || empty($schedule['end'])) {
-            continue;
-        }
-        $arrangeSchedules[$key] = $schedule;
+    // Insert a single offering with room stored in section
+    $stmt = $conn->prepare("INSERT INTO teacher_subjects (teacher_id, subject_id, course, section, year_level, semester, school_year, assigned_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param('iissssss', $teacher_id, $subject_id, $course, $room, $year_level, $semester, $school_year, $assigned_at);
+    if ($stmt->execute()) {
+        $_SESSION['success'] = "Saved!";
+    } else {
+        $_SESSION['error'] = "Failed to save.";
     }
-    // myTools::display(compact('teacher_id', 'subject_id', 'course', 'year_level', 'semester', 'school_year', 'arrangeSchedules'));
-    // exit;
-
-    $conflict_messages = [];
-    $success_messages = [];
-
-    foreach ($arrangeSchedules as $key => $val) {
-        $start = $val['start'];
-        $end = $val['end'];
-        $prefix = $val['prefix'];
-        $keyStart =  $prefix . 'start';
-        $keyEnd = $prefix . 'end';
-
-        $queryConflict = $conn->query(
-            "SELECT * from teacher_subjects where teacher_id = '$teacher_id' and semester = '$semester' and school_year = '$school_year' and ($keyStart >= '$start' and $keyEnd < '$start') or ($keyStart > '$end' and $keyEnd <= '$end')"
-        )->fetch_all(MYSQLI_ASSOC);
-
-        if (empty($queryConflict)) {
-            // insert
-            $conn->query("INSERT into teacher_subjects(teacher_id, subject_id, course, year_level, semester, school_year, $keyStart, $keyEnd, assigned_date) values('$teacher_id', '$subject_id', '$course', '$year_level', '$semester', '$school_year', '$start', '$end', '$assigned_at')");
-        } else {
-        }
-    }
-
-    if (!$conflict_messages) {
-        $success_messages[] = "Saved!";
-    }
-
-    if (!empty($success_messages)) {
-        $_SESSION['success'] = implode("<br>", $success_messages);
-    }
+    $stmt->close();
 
     header("location: asignteacher.php");
 }

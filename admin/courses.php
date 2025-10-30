@@ -142,7 +142,7 @@ $row_count = 1;
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitleId">
-                        Add Course
+                        Add Program
                     </h5>
                     <button
                         type="button"
@@ -157,12 +157,12 @@ $row_count = 1;
                             <div class="d-flex flex-column gap-4 mb-4">
 
                                 <div class="form-group w-100">
-                                    <label for="course_code">Course:</label>
+                                    <label for="course_code">Program Abbreviation:</label>
                                     <input type="text" name="course_code" id="course_code" placeholder="Example: DIT" class="form-control" required>
                                 </div>
 
                                 <div class="form-group w-100">
-                                    <label for="course_name">Course Name:</label>
+                                    <label for="course_name">Program Name:</label>
                                     <input type="text" name="course_name" id="course_name" placeholder="Example: Diploma in Information Technology" class="form-control" required>
                                 </div>
                             </div>
@@ -170,7 +170,7 @@ $row_count = 1;
                             <div>
                                 <button type="submit" class="btn btn-primary" name="add_course">
                                     <i class="fa fa-plus-circle"></i>
-                                    Add Course
+                                    Add Program
                                 </button>
                             </div>
 
@@ -198,7 +198,7 @@ $row_count = 1;
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalTitleId">
-                        Assign Teacher
+                        Edit Program
                     </h5>
                     <button
                         type="button"
@@ -214,20 +214,20 @@ $row_count = 1;
                             <div class="d-flex flex-column gap-4 mb-4">
 
                                 <div class="form-group w-100">
-                                    <label for="mcourse_code">Course:</label>
+                                    <label for="mcourse_code">Program Abbreviation:</label>
                                     <input type="text" name="course_code" id="mcourse_code" placeholder="Example: DIT" class="form-control" required>
                                 </div>
 
                                 <div class="form-group w-100">
-                                    <label for="mcourse_name">Course Name:</label>
+                                    <label for="mcourse_name">Program Name:</label>
                                     <input type="text" name="course_name" id="mcourse_name" placeholder="Example: Diploma in Information Technology" class="form-control" required>
                                 </div>
                             </div>
 
                             <div>
                                 <button type="submit" class="btn btn-primary" name="update_course">
-                                    <i class="fa fa-plus-circle"></i>
-                                    Add Course
+                                    <i class="fa fa-save"></i>
+                                    Update Program
                                 </button>
                             </div>
 

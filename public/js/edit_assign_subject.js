@@ -8,9 +8,7 @@ var request = $.ajax({
 
 request.done(function (msg) {
     
-    // alert(msg.id);
-    // console.log(msg);
-
+    
     $("#t_id").val(msg.id); 
     $("#teacher_name").val(msg.teacher_id); 
     $("#mecourse").val(msg.s_course).trigger('change'); 
@@ -21,10 +19,7 @@ request.done(function (msg) {
     $("#mesy").val(msg.school_year);
     $("#mesubject").val(msg.s_descriptive_title).prop('disabled', false);
 
-     // Schedule
-    $("#meschedule_day").val(msg.schedule_day);
-    $("#meschedule_time_start").val(msg.schedule_time_start);
-    $("#meschedule_time_end").val(msg.schedule_time_end);
+    
 });
 });
 
@@ -97,11 +92,7 @@ request.done(function (msg) {
     $("#mvsemester").val(msg.s_semester);
     $("#mvassigned").val(msg.assigned_date);
 
-// alert(msg.schedule_day)
-     // Schedule
-    $("#mvschedule_day").val(msg.schedule_day);
-    $("#mvschedule_time_start").val(msg.schedule_time_start);
-    $("#mvschedule_time_end").val(msg.schedule_time_end);
+    
     
 });
 });

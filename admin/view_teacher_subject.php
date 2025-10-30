@@ -131,52 +131,12 @@ $teacher = $assignTeachers->fetch_assoc();
                             <input type="text" name="school_year" value="<?= $teacher['school_year']; ?>" disabled class="form-control">
                         </div>
                     </div>
-                    <hr>
-                    <!-- SCHEDULE FIELDS -->
-                    <div class="form-group mb-4">
-                        <label for="schedule_day">Schedule:</label>
-                        <table class="table" id="scheduleTable">
-                            <thead>
-                                <tr>
-                                    <th>Day</th>
-                                    <th>Start Time</th>
-                                    <th>End Time</th>
-                                    <th>Section</th>
-
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                // Fetch all schedules for this teacher-subject
-                                $schedules = $conn->query("SELECT id, section, schedule_day, schedule_time_start, schedule_time_end 
-                               FROM teacher_subjects 
-                               WHERE teacher_id = $teacher_id2 
-                               AND subject_id = $subject_id2");
-
-                                while ($row = $schedules->fetch_assoc()): ?>
-                                    <tr id="row-<?= $row['id']; ?>">
-                                        <input type="hidden" name="schedule_ids[]" value="<?= $row['id']; ?>">
-                                        <td>
-                                            <select name="schedule_days[]" class="form-control" disabled>
-                                                <option value="Monday" <?= ($row['schedule_day'] == 'Monday') ? 'selected' : ''; ?>>Monday</option>
-                                                <option value="Tuesday" <?= ($row['schedule_day'] == 'Tuesday') ? 'selected' : ''; ?>>Tuesday</option>
-                                                <option value="Wednesday" <?= ($row['schedule_day'] == 'Wednesday') ? 'selected' : ''; ?>>Wednesday</option>
-                                                <option value="Thursday" <?= ($row['schedule_day'] == 'Thursday') ? 'selected' : ''; ?>>Thursday</option>
-                                                <option value="Friday" <?= ($row['schedule_day'] == 'Friday') ? 'selected' : ''; ?>>Friday</option>
-                                                <option value="Saturday" <?= ($row['schedule_day'] == 'Saturday') ? 'selected' : ''; ?>>Saturday</option>
-                                            </select>
-                                        </td>
-                                        <td><input type="time" name="schedule_time_start[]" value="<?= $row['schedule_time_start']; ?>" required class="form-control" disabled></td>
-                                        <td><input type="time" name="schedule_time_end[]" value="<?= $row['schedule_time_end']; ?>" required class="form-control" disabled></td>
-                                        <td><input type="text" name="section[]" value="<?= $row['section']; ?>" required class="form-control" disabled></td>
-
-                                    </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-
-
-                        </table>
-
+                    
+                    <div class="d-flex flex-row gap-4">
+                        <div class="form-group w-100">
+                            <label>Room:</label>
+                            <input type="text" value="<?= $teacher['section']; ?>" disabled class="form-control">
+                        </div>
                     </div>
 
                 </form>

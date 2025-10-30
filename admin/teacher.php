@@ -14,7 +14,7 @@ if (isset($_SESSION['user'])) {
     exit;
 }
 
-$teachers = $conn->query("SELECT * FROM teachers ORDER BY t_name ASC");
+$teachers = $conn->query("SELECT teachers.*, COALESCE(web_users.usertype,'t') as usertype FROM teachers LEFT JOIN web_users ON web_users.email = teachers.t_user_name ORDER BY t_name ASC");
 
 $row_count = 1;
 
@@ -103,14 +103,10 @@ $row_count = 1;
                                     <td><?= $row_count; ?></td>
                                     <td style="text-transform:capitalize"><?= $teacher['t_name'] ?></td>
                                     <td>
-                                        <?php if ($teacher['status'] == 1) : ?>
-                                            <button class="btn btn-primary" disabled>
-                                                <i class="fa fa-check-circle"></i> Active
-                                            </button>
+                                        <?php if (($teacher['usertype'] ?? 't') === 't') : ?>
+                                            <span class="badge bg-primary"><i class="fa fa-check-circle"></i> Active</span>
                                         <?php else : ?>
-                                            <button class="btn btn-danger" disabled>
-                                                <i class="fa fa-times-circle"></i> Inactive
-                                            </button>
+                                            <span class="badge bg-danger"><i class="fa fa-times-circle"></i> Inactive</span>
                                         <?php endif; ?>
                                     </td>
 
@@ -124,9 +120,15 @@ $row_count = 1;
                                             <button type="submit" class="btn btn-warning view" data-bs-toggle="modal" data-bs-target="#videTeacher" value="<?= $teacher['t_id'] ?>">
                                                 <i class="fa-solid fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-danger delete-teacher" data-id="<?= $teacher['t_id'] ?>">
-                                                <i class="fa-solid fa-trash-alt"></i>
-                                            </button>
+                                            <?php if (($teacher['usertype'] ?? 't') === 't'): ?>
+                                                <button class="btn btn-warning toggle-teacher" data-id="<?= $teacher['t_id'] ?>" data-action="deactivate">
+                                                    <i class="fa fa-user-slash"></i>
+                                                </button>
+                                            <?php else: ?>
+                                                <button class="btn btn-success toggle-teacher" data-id="<?= $teacher['t_id'] ?>" data-action="activate">
+                                                    <i class="fa fa-user-check"></i>
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -369,42 +371,44 @@ $row_count = 1;
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll(".delete-teacher").forEach(button => {
+            document.querySelectorAll(".toggle-teacher").forEach(button => {
                 button.addEventListener("click", function() {
                     let teacherId = this.getAttribute("data-id");
+                    let action = this.getAttribute("data-action");
 
+                    const verb = action === 'deactivate' ? 'Deactivate' : 'Activate';
                     Swal.fire({
-                        title: "Are you sure?",
-                        text: "You won't be able to undo this!",
+                        title: verb + " instructor?",
+                        text: action === 'deactivate' ? "They won't be able to sign in, records remain intact." : "Allow sign in again.",
                         icon: "warning",
                         showCancelButton: true,
-                        confirmButtonColor: "#d33",
+                        confirmButtonColor: action === 'deactivate' ? "#d33" : "#198754",
                         cancelButtonColor: "#3085d6",
-                        confirmButtonText: "Yes, delete it!",
-                        cancelButtonText: "No, cancel!"
+                        confirmButtonText: "Yes, " + verb.toLowerCase() + "!",
+                        cancelButtonText: "Cancel"
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            fetch("delete_teacher.php", {
+                            fetch("toggle_teacher_status.php", {
                                     method: "POST",
                                     headers: {
                                         "Content-Type": "application/x-www-form-urlencoded"
                                     },
-                                    body: "teacher_id=" + teacherId
+                                    body: `teacher_id=${teacherId}&action=${action}`
                                 })
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
                                         Swal.fire({
-                                            title: "Deleted!",
-                                            text: "The teacher has been successfully removed.",
+                                            title: verb + "d!",
+                                            text: data.message || "Status updated.",
                                             icon: "success",
-                                            timer: 2000,
+                                            timer: 1500,
                                             showConfirmButton: false
                                         }).then(() => {
                                             location.reload();
                                         });
                                     } else {
-                                        Swal.fire("Error!", "Failed to delete the teacher.", "error");
+                                        Swal.fire("Error!", data.message || "Failed to update.", "error");
                                     }
                                 })
                                 .catch(error => {

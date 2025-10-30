@@ -99,7 +99,7 @@ while ($row = $missing_result->fetch_assoc()) {
             <div class="main-wrapper" style="padding: 4%;">
                 <div class="intro mb-5">
                     <h1 class="text-center" style="font-weight: 700;">
-                        <?php echo isset($student_course_name) ? $student_course_name : "Course Not Found"; ?>
+                        <?php echo isset($student_course_name) ? $student_course_name : "Program Not Found"; ?>
                     </h1>
                     <hr>
 
@@ -135,7 +135,7 @@ while ($row = $missing_result->fetch_assoc()) {
                             <?php foreach ($missing_alerts as $alert): ?>
                                 <li>
                                     <strong>Year Level:</strong> <?= $alert['year_level']; ?> <br>
-                                    <strong>Course:</strong>
+                                    <strong>Program:</strong>
                                     <?= isset($course_mapping[$alert['course_name']]) ? $course_mapping[$alert['course_name']] : $alert['course_name']; ?> <br>
                                     <strong>Course Code:</strong> <?= $alert['s_course_code']; ?> <br>
                                     <strong>Subject:</strong> <?= $alert['s_descriptive_title']; ?> <br>

@@ -81,9 +81,14 @@ foreach ($courses as $course) {
                 </div>
 
                 <div class="row g-3 mt-4 align-items-end">
+                    <!-- Quick search by student name -->
+                    <div class="col-md-4">
+                        <label for="searchName" class="form-label">Search Student Name</label>
+                        <input type="text" id="searchName" class="form-control" placeholder="e.g., Juan Dela Cruz">
+                    </div>
                     <!-- Course -->
-                    <div class="col-md-3">
-                        <label for="filterCourse" class="form-label">Course</label>
+                    <div class="col-md-2">
+                        <label for="filterCourse" class="form-label">Program</label>
                         <select id="filterCourse" class="form-select">
                             <option value="">All Courses</option>
                             <?php foreach ($courses as $c): ?>
@@ -95,7 +100,7 @@ foreach ($courses as $course) {
                     </div>
 
                     <!-- Year Level -->
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="filterYear" class="form-label">Year Level</label>
                         <select id="filterYear" class="form-select">
                             <option value="">All Level</option>
@@ -108,7 +113,7 @@ foreach ($courses as $course) {
                     </div>
 
                     <!-- Semester -->
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="filterSemester" class="form-label">Semester</label>
                         <select id="filterSemester" class="form-select">
                             <option value="">All Semesters</option>
@@ -121,7 +126,7 @@ foreach ($courses as $course) {
                     </div>
 
                     <!-- School Year -->
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="filterSY" class="form-label">School Year</label>
                         <select id="filterSY" class="form-select">
                             <option value="">All Years</option>
@@ -174,12 +179,13 @@ foreach ($courses as $course) {
                 const sy = $('#filterSY').val();
                 const target = $('#subjectList');
 
-                // ajax call or table filtering logic can be added here
+                // ajax call
 
                 $.ajax({
                     url: 'get_all_subjects.php',
                     type: 'POST',
                     data: {
+                        q: $('#searchName').val(),
                         course: course,
                         year: year,
                         semester: semester,
@@ -208,6 +214,7 @@ foreach ($courses as $course) {
                 $('#filterYear').val('');
                 $('#filterSemester').val('');
                 $('#filterSY').val('');
+                $('#searchName').val('');
 
                 $('#btnSearch').trigger('click');
             });

@@ -473,4 +473,81 @@ class myTools
 
         return $query;
     }
+
+    // Auto-enroll a student to all subjects for a Program + Year Level + School Year
+    // while respecting a per-section capacity. Creates new sections if needed.
+    public static function autoEnrollStudentToProgramYearSY($params = []): array
+    {
+        $conn = $params['conn'] ?? null;
+        $studentId = $params['student_id'] ?? null;
+        $courseId = $params['course_id'] ?? null;
+        $yearLevel = $params['year_level'] ?? '';
+        $schoolYear = $params['school_year'] ?? '';
+        $capacity = intval($params['capacity'] ?? (int)env('DEFAULT_SECTION_CAPACITY', 45));
+
+        $result = ['created' => 0, 'skipped' => 0, 'errors' => []];
+        if (!$conn || !($conn instanceof mysqli) || empty($studentId) || empty($courseId) || empty($yearLevel) || empty($schoolYear)) {
+            $result['errors'][] = 'Invalid parameters.';
+            return $result;
+        }
+
+        // Normalize year labels
+        $map = [
+            '1st year' => 'First Year', 'first year' => 'First Year',
+            '2nd year' => 'Second Year', 'second year' => 'Second Year',
+            '3rd year' => 'Third Year', 'third year' => 'Third Year'
+        ];
+        $key = strtolower($yearLevel);
+        $yearLevel = $map[$key] ?? $yearLevel;
+
+        // All offerings for this program/year/sy grouped by subject
+        $offerings = $conn->query(
+            "SELECT DISTINCT subject_id, semester FROM teacher_subjects WHERE course = '".$conn->real_escape_string($courseId)."' AND year_level = '".$conn->real_escape_string($yearLevel)."' AND school_year = '".$conn->real_escape_string($schoolYear)."'"
+        )->fetch_all(MYSQLI_ASSOC);
+
+        foreach ($offerings as $off) {
+            $subjectId = (int)$off['subject_id'];
+            // Find all sections for this subject offering
+            $sections = $conn->query(
+                "SELECT id, section FROM teacher_subjects WHERE course = '".$conn->real_escape_string($courseId)."' AND year_level = '".$conn->real_escape_string($yearLevel)."' AND school_year = '".$conn->real_escape_string($schoolYear)."' AND subject_id = '$subjectId' ORDER BY id"
+            )->fetch_all(MYSQLI_ASSOC);
+
+            // Find a section with space
+            $chosenTsId = null; $sectionCount = 0;
+            foreach ($sections as $sec) {
+                $tsId = (int)$sec['id'];
+                $cnt = $conn->query("SELECT COUNT(*) as c FROM teacher_subject_enrollees WHERE teacher_subject_id = $tsId")->fetch_assoc()['c'] ?? 0;
+                if ($cnt < $capacity) { $chosenTsId = $tsId; break; }
+                $sectionCount++;
+            }
+
+            // If none has space, create a new section by cloning the first one
+            if ($chosenTsId === null) {
+                $base = $conn->query("SELECT * FROM teacher_subjects WHERE course = '".$conn->real_escape_string($courseId)."' AND year_level = '".$conn->real_escape_string($yearLevel)."' AND school_year = '".$conn->real_escape_string($schoolYear)."' AND subject_id = '$subjectId' LIMIT 1")->fetch_assoc();
+                if ($base) {
+                    $newSectionName = 'SEC ' . ($sectionCount + 1);
+                    $stmt = $conn->prepare("INSERT INTO teacher_subjects (teacher_id, subject_id, course, section, year_level, semester, school_year, assigned_date) VALUES (NULL, ?, ?, ?, ?, ?, ?, NOW())");
+                    $stmt->bind_param('iissss', $subjectId, $base['course'], $newSectionName, $base['year_level'], $base['semester'], $base['school_year']);
+                    if ($stmt->execute()) {
+                        $chosenTsId = $conn->insert_id;
+                    }
+                    $stmt->close();
+                }
+            }
+
+            if ($chosenTsId) {
+                // Avoid duplicates
+                $exists = $conn->query("SELECT 1 FROM teacher_subject_enrollees WHERE student_id = '".$conn->real_escape_string($studentId)."' AND teacher_subject_id = $chosenTsId");
+                if ($exists && $exists->num_rows) { $result['skipped']++; continue; }
+                $stmt = $conn->prepare("INSERT INTO teacher_subject_enrollees (student_id, teacher_subject_id) VALUES (?, ?)");
+                $stmt->bind_param('ii', $studentId, $chosenTsId);
+                if ($stmt->execute()) { $result['created']++; } else { $result['errors'][] = 'Failed to enroll'; }
+                $stmt->close();
+            } else {
+                $result['errors'][] = 'No offering base found for subject '.$subjectId;
+            }
+        }
+
+        return $result;
+    }
 }

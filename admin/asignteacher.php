@@ -5,14 +5,14 @@ require_once  '../config/conn.php';
 require_once  '../config/myTools.php';
 
 $courses = $conn->query("SELECT DISTINCT subjects.s_course,
-    courses.course_name 
+    programs.program_name 
     FROM subjects 
-    JOIN courses ON subjects.s_course = courses.id");
+    JOIN programs ON subjects.s_course = programs.id");
 
 $courses2 = $conn->query("SELECT DISTINCT subjects.s_course,
-    courses.course_name 
+    programs.program_name 
     FROM subjects 
-    JOIN courses ON subjects.s_course = courses.id");
+    JOIN programs ON subjects.s_course = programs.id");
 
 $weekdays = [
     1 => 'Monday',
@@ -57,20 +57,10 @@ function formatSchedule($schedule_days, $schedule_times)
     return implode("<br>", $formattedSchedule);
 }
 
-// QUERY: Get assigned teachers and subjects
-$assignTeachers = $conn->query("
-    SELECT 
-        teachers.t_name, 
-        subjects.s_descriptive_title, 
-        subjects.s_course, 
-        subjects.s_course_code, 
-        teacher_subjects.*
-    FROM teacher_subjects
-    JOIN teachers ON teacher_subjects.teacher_id = teachers.t_id
-    JOIN subjects ON teacher_subjects.subject_id = subjects.s_id 
-    GROUP BY teachers.t_name, subjects.s_course_code, subjects.s_descriptive_title, teacher_subjects.course, teacher_subjects.year_level, teacher_subjects.semester, teacher_subjects.school_year
-    ORDER BY teachers.t_name ASC
-")->fetch_all(MYSQLI_ASSOC);
+// QUERY: Get assigned teachers and subjects (optional SY filter)
+$filterSy = isset($_GET['sy']) ? trim($_GET['sy']) : '';
+$syCondition = $filterSy !== '' ? "WHERE teacher_subjects.school_year = '".$conn->real_escape_string($filterSy)."'" : '';
+$assignTeachers = $conn->query("\n    SELECT \n        teachers.t_name, \n        subjects.s_descriptive_title, \n        subjects.s_course, \n        subjects.s_course_code, \n        teacher_subjects.*\n    FROM teacher_subjects\n    JOIN teachers ON teacher_subjects.teacher_id = teachers.t_id\n    JOIN subjects ON teacher_subjects.subject_id = subjects.s_id \n    $syCondition\n    GROUP BY teachers.t_name, subjects.s_course_code, subjects.s_descriptive_title, teacher_subjects.course, teacher_subjects.year_level, teacher_subjects.semester, teacher_subjects.school_year\n    ORDER BY teachers.t_name ASC\n")->fetch_all(MYSQLI_ASSOC);
 
 $year = date("Y");
 $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year + 2)]];
@@ -126,6 +116,24 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
         <main class="main">
             <div class="main-wrapper" style="padding: 4%;">
                 <h2 class="text-center" style="font-weight: 800; text-transform:uppercase">Add and Assign Instructors</h2>
+                <div class="d-flex gap-3 align-items-end mt-3">
+                    <div class="form-group">
+                        <label for="filterSY" class="form-label">Filter by School Year</label>
+                        <select id="filterSY" class="form-select">
+                            <option value="">All</option>
+                            <?php 
+                            $sys = $conn->query("SELECT DISTINCT school_year FROM teacher_subjects ORDER BY school_year DESC");
+                            while ($r = $sys->fetch_assoc()) { 
+                                $sel = ($filterSy === $r['school_year']) ? 'selected' : '';
+                            ?>
+                                <option value="<?= htmlspecialchars($r['school_year']) ?>" <?= $sel ?>><?= htmlspecialchars($r['school_year']) ?></option>
+                            <?php } ?>
+                        </select>
+                    </div>
+                    <?php if ($filterSy !== ''): ?>
+                        <div class="ms-2"><span class="badge bg-secondary">SY: <?= htmlspecialchars($filterSy) ?></span></div>
+                    <?php endif; ?>
+                </div>
                 <!-- Modal trigger button -->
                 <div class="message">
                     <?php if (isset($_SESSION['error'])): ?>
@@ -160,7 +168,7 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
                     data-bs-toggle="modal"
                     data-bs-target="#assignTeacher">
                     <i class="fa fa-plus-circle"></i>
-                    Assign Schedule to Instructor
+                    Assign Instructor
                 </button>
 
 
@@ -172,7 +180,6 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
                                 <th>Name</th>
                                 <th>Course Code</th>
                                 <th>Assigned Subject</th>
-                                <th>Schedule</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -186,17 +193,6 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
                                     <td style="font-size: 14px; text-transform:capitalize"><?= $assign['t_name'] ?></td>
                                     <td style="font-size: 14px;"><?= $assign['s_course_code'] ?></td>
                                     <td style="line-height: 1; font-size: 14px"><?= nl2br(wordwrap($assign['s_descriptive_title'], 30, "<br>\n")) ?></td>
-                                    <td style="font-size: 14px;">
-                                        <?php foreach ($weekdaysWithPrefixes as $key => $prefix) {
-                                            $startKey = $prefix . 'start';
-                                            $endKey = $prefix . 'end';
-                                            $start = !empty($assign[$startKey]) ? date("h:i A", strtotime($assign[$startKey])) : '';
-                                            $end   = !empty($assign[$endKey]) ? date("h:i A", strtotime($assign[$endKey])) : '';
-                                            if (!empty($start) && !empty($end)) { ?>
-                                                <div><?= $weekdays[$key] . 's ' . $start . ' - ' . $end ?></div>
-                                        <?php }
-                                        } ?>
-                                    </td>
 
 
                                     <td>
@@ -304,50 +300,14 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
                             </div>
                         </div>
 
-                        <!-- SCHEDULE FIELDS -->
-                        <div class="form-group mb-4">
-                            <label for="schedule_day">Schedule:</label>
-                            <table class="table" id="scheduleTable">
-                                <thead>
-                                    <tr>
-                                        <th>Day</th>
-                                        <th>Start Time</th>
-                                        <th>End Time</th>
-                                        <th>Room</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($weekdays as $key => $weekday) { ?>
-                                        <tr>
-                                            <td>
-                                                <p><?= $weekday ?></p>
-                                            </td>
-                                            <td>
-                                                <input type="time" name="schedule_time_start_<?= $key ?>" class="form-control" readonly id="schedule_time_start_<?= $key ?>">
-                                            </td>
-                                            <td>
-                                                <input type="time" name="schedule_time_end_<?= $key ?>" class="form-control" readonly id="schedule_time_end_<?= $key ?>">
-                                            </td>
-                                            <td>
-                                                <input type="text" name="room_<?= $key ?>" class="form-control" placeholder="Room" readonly id="room_<?= $key ?>">
-                                            </td>
-                                            <td>
-                                                <button type="button" class="btn btn-success btn-sm" id="include_<?= $key ?>">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-danger btn-sm d-none" id="exclude_<?= $key ?>">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-
-                                            </td>
-
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                            <!-- <button type="button" id="add_schedule" class="btn btn-secondary mb-3">+ Add Schedule</button> -->
+                        <div class="d-flex flex-row gap-4 mb-4">
+                            <div class="form-group w-100">
+                                <label for="room">Room</label>
+                                <input type="text" id="room" name="room" class="form-control" placeholder="e.g., Room 101">
+                            </div>
                         </div>
+
+                        
 
                         <div>
                             <button type="submit" class="btn btn-primary">
@@ -449,31 +409,7 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
                         </div>
 
 
-                        <div class="d-flex flex-row gap-4 mb-5">
-                            <div class="form-group w-100">
-                                <label for="meschedule_day">Schedule Day:</label>
-                                <select id="meschedule_day" name="schedule_day" required class="form-control">
-                                    <option hidden selected disabled>Select Day</option>
-                                    <option value="Monday">Monday</option>
-                                    <option value="Tuesday">Tuesday</option>
-                                    <option value="Wednesday">Wednesday</option>
-                                    <option value="Thursday">Thursday</option>
-                                    <option value="Friday">Friday</option>
-                                    <option value="Saturday">Saturday</option>
-                                    <option value="Sunday">Sunday</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group w-100">
-                                <label for="meschedule_time_start">Time Start:</label>
-                                <input type="time" id="meschedule_time_start" name="schedule_time_start" required class="form-control">
-                            </div>
-
-                            <div class="form-group w-100">
-                                <label for="meschedule_time_end">Time End:</label>
-                                <input type="time" id="meschedule_time_end" name="schedule_time_end" required class="form-control">
-                            </div>
-                        </div>
+                        
 
 
                         <div>
@@ -570,23 +506,7 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
 
                             </div>
 
-                            <div class="d-flex flex-row gap-4 mb-5">
-                                <div class="form-group w-100">
-                                    <label for="mvschedule_day">Schedule Day:</label>
-                                    <input type="text" id="mvschedule_day" name="schedule_day" class="form-control" disabled>
-
-                                </div>
-
-                                <div class="form-group w-100">
-                                    <label for="mvschedule_time_start">Time Start:</label>
-                                    <input type="time" id="mvschedule_time_start" name="schedule_time_start" disabled required class="form-control">
-                                </div>
-
-                                <div class="form-group w-100">
-                                    <label for="mvschedule_time_end">Time End:</label>
-                                    <input type="time" id="mvschedule_time_end" name="schedule_time_end" disabled required class="form-control">
-                                </div>
-                            </div>
+                            
                         </div>
 
                     </form>
@@ -612,9 +532,15 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
 
     <!-- Assign Teacher Js -->
     <script src="../public/js/asignteacher.js"></script>
-    <script src="../public/js/edit_assign_subject.js"></script>
+    
 
     <script>
+        document.getElementById('filterSY').addEventListener('change', function(){
+            const v = this.value;
+            const url = new URL(window.location.href);
+            if (v) { url.searchParams.set('sy', v); } else { url.searchParams.delete('sy'); }
+            window.location.href = url.toString();
+        });
         document.addEventListener("DOMContentLoaded", function() {
 
             fetch("get_courses.php")
@@ -696,39 +622,7 @@ $schoolyears = [[$year - 1, $year], [$year, ($year + 1)], [($year + 1), ($year +
             });
 
 
-            // When INCLUDE button is clicked
-            $("button[id^='include_']").on('click', function() {
-                const id = $(this).attr('id');
-                const index = id.split('_')[1];
-                const startId = `#schedule_time_start_${index}`;
-                const endId = `#schedule_time_end_${index}`;
-                const roomId = `#room_${index}`;
-                const excludeId = `#exclude_${index}`;
-
-                $(startId).prop('required', true).prop('readonly', false);
-                $(endId).prop('required', true).prop('readonly', false);
-                $(roomId).prop('readonly', false);
-
-                $(this).addClass('d-none');
-                $(excludeId).removeClass('d-none');
-            });
-
-            // When EXCLUDE button is clicked
-            $("button[id^='exclude_']").on('click', function() {
-                const id = $(this).attr('id');
-                const index = id.split('_')[1];
-                const startId = `#schedule_time_start_${index}`;
-                const endId = `#schedule_time_end_${index}`;
-                const roomId = `#room_${index}`;
-                const includeId = `#include_${index}`;
-
-                $(startId).prop('required', false).prop('readonly', true).val('');
-                $(endId).prop('required', false).prop('readonly', true).val('');
-                $(roomId).prop('readonly', true).val('');
-
-                $(this).addClass('d-none');
-                $(includeId).removeClass('d-none');
-            });
+            
 
         });
     </script>
