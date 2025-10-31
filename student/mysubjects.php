@@ -1,32 +1,12 @@
 <?php
 session_start();
 require_once '../config/conn.php';
+require_once '../config/myTools.php';
 
 $student_id = $_SESSION['student_id'];
 
-$query = "SELECT 
-            sg.course_code, 
-            sg.descriptive_title, 
-            sg.semester, 
-            sg.year_level, 
-            sg.school_year, 
-            sg.final_rating, 
-            sg.remarks, 
-            t.t_name AS teacher_name
-          FROM student_grades sg
-          JOIN teacher_subjects ts ON sg.subject_id = ts.subject_id
-          JOIN teachers t ON ts.teacher_id = t.t_id
-          WHERE sg.student_id = ?
-          ORDER BY sg.school_year DESC, sg.year_level DESC, sg.semester DESC";
+$studentSchoolyears = $conn->query("SELECT ts.school_year FROM teacher_subject_enrollees tse join teacher_subjects ts on tse.teacher_subject_id = ts.id WHERE tse.student_id = '$student_id' group by ts.school_year")->fetch_all(MYSQLI_ASSOC);
 
-$stmt = $conn->prepare($query);
-$stmt->bind_param("i", $student_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-$last_semester = "";
-$last_year_level = "";
-$last_school_year = "";
 ?>
 
 <!DOCTYPE html>
@@ -53,59 +33,55 @@ $last_school_year = "";
 
             <div class="main-wrapper" style="padding: 4%;">
                 <h2>Welcome, <?= $_SESSION['student_name']; ?>!</h2>
-                <p>Below are your enrolled subjects and corresponding grades:</p>
+                <p>Below are your enrolled course and corresponding grades:</p>
 
-                <?php if ($result->num_rows > 0): ?>
-                    <?php while ($row = $result->fetch_assoc()): ?>
-                        <?php
+                <div class="row  mb-4">
+                    <div class="col mb-2">
+                        <select id="searchSchoolYear" class="form-control">
+                            <option value="all">All School Years</option>
+                            <?php foreach($studentSchoolyears as $sy): ?>
+                                <option value="<?= $sy['school_year'] ?>"><?= $sy['school_year'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
-                        if ($last_semester !== $row['semester'] || $last_year_level !== $row['year_level'] || $last_school_year !== $row['school_year']) {
-                            if ($last_semester !== "") {
-                                echo "</tbody></table>";
-                            }
+                    <!-- search button -->
+                    <div class="col mb-2">
+                        <button id="searchButton" class="btn btn-primary">Search</button>
+                    </div>
 
-                            // Display semester, year level, and school year above the table header
-                            echo "<h4 class='text-center mt-4 text-primary'>
-                            {$row['semester']} | Year {$row['year_level']} | SY: {$row['school_year']}
-                          </h4>";
+                    <!-- table -->
+                </div>
+                <div id="studentSubjects">
 
-                            // Start new table
-                            echo "<table class='table table-bordered table-striped'>
-                            <thead class='table-dark'>
-                                <tr>
-                                    <th>Course Code</th>
-                                    <th>Descriptive Title</th>
-                                    
-                                    <th>Remarks</th>
-                                    <th>Assigned Teacher</th>
-                                </tr>
-                            </thead>
-                            <tbody>";
-
-                            // Update tracking variables
-                            $last_semester = $row['semester'];
-                            $last_year_level = $row['year_level'];
-                            $last_school_year = $row['school_year'];
-                        }
-                        ?>
-                        <tr>
-                            <td><?= $row['course_code']; ?></td>
-                            <td><?= $row['descriptive_title']; ?></td>
-
-                            <td><?= $row['remarks']; ?></td>
-                            <td><?= $row['teacher_name']; ?></td>
-                        </tr>
-                    <?php endwhile; ?>
-                    </tbody>
-                    </table>
-                <?php else: ?>
-                    <p class="text-danger">No subjects found.</p>
-                <?php endif; ?>
+                </div>
             </div>
         </main>
     </div>
 
     <script src="../public/assets/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            // ajax to fetch school years
+            $("#searchButton").click(function(){
+                var school_year = $("#searchSchoolYear").val();
+                $.ajax({
+                    method: "POST",
+                    url:"get_grades.php",
+                    data: {
+                        school_year,
+                    },
+                    error: function(){
+                        $("#studentSubjects").html("<div class='alert alert-danger'>An error occurred while fetching data.</div>");
+                    },
+                    success: function(response){
+                        $("#studentSubjects").html(response);
+                    }
+                })
+            })
+            $("#searchButton").trigger("click");
+        });
+    </script>
 </body>
 
 </html>

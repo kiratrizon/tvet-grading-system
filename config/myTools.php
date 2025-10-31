@@ -473,4 +473,38 @@ class myTools
 
         return $query;
     }
+
+    public static function getStudentSubjects($params = [])
+    {
+        $conn = $params['conn'] ?? null;
+        $student_id = $params['student_id'] ?? null;
+
+        if (!$conn || !($conn instanceof mysqli)) {
+            return [];
+        }
+        if (empty($student_id)) {
+            return [];
+        }
+
+        $school_year = $params['school_year'] ?? null;
+
+        $conditions = [];
+        if (!empty($student_id)) {
+            $conditions[] = "tse.student_id = '$student_id'";
+        }
+
+        if (!empty($school_year) && $school_year != 'all') {
+            $conditions[] = "ts.school_year = '$school_year'";
+        }
+
+        $whereClause = '';
+        if (!empty($conditions)) {
+            $whereClause = 'WHERE ' . implode(' AND ', $conditions);
+        }
+
+        // select all from teacher_subject_enrollees where student_id = $student_id
+        $query = $conn->query("SELECT tse.* FROM teacher_subject_enrollees tse join teacher_subjects ts on tse.teacher_subject_id = ts.id $whereClause")->fetch_all(MYSQLI_ASSOC);
+
+        return $query;
+    }
 }
