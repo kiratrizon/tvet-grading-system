@@ -503,7 +503,7 @@ class myTools
         }
 
         // select all from teacher_subject_enrollees where student_id = $student_id
-        $query = $conn->query("SELECT tse.* FROM teacher_subject_enrollees tse join teacher_subjects ts on tse.teacher_subject_id = ts.id $whereClause")->fetch_all(MYSQLI_ASSOC);
+        $query = $conn->query("SELECT tse.id as enrollee_id, s.s_course_code, ts.school_year, s.s_semester as semester, s.s_descriptive_title as description, ts.id as teacher_subject, s.s_units as units FROM teacher_subject_enrollees tse join teacher_subjects ts on tse.teacher_subject_id = ts.id join subjects s on ts.subject_id = s.s_id $whereClause order by ts.school_year, ts.year_level, s.s_semester, s.s_course_code")->fetch_all(MYSQLI_ASSOC);
 
         return $query;
     }

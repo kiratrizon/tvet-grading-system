@@ -39,7 +39,7 @@ $studentSchoolyears = $conn->query("SELECT ts.school_year FROM teacher_subject_e
                     <div class="col mb-2">
                         <select id="searchSchoolYear" class="form-control">
                             <option value="all">All School Years</option>
-                            <?php foreach($studentSchoolyears as $sy): ?>
+                            <?php foreach ($studentSchoolyears as $sy): ?>
                                 <option value="<?= $sy['school_year'] ?>"><?= $sy['school_year'] ?></option>
                             <?php endforeach; ?>
                         </select>
@@ -61,22 +61,33 @@ $studentSchoolyears = $conn->query("SELECT ts.school_year FROM teacher_subject_e
 
     <script src="../public/assets/js/bootstrap.bundle.min.js"></script>
     <script>
-        $(document).ready(function(){
+        $(document).ready(function() {
             // ajax to fetch school years
-            $("#searchButton").click(function(){
+            $("#searchButton").click(function() {
                 var school_year = $("#searchSchoolYear").val();
                 $.ajax({
                     method: "POST",
-                    url:"get_grades.php",
+                    url: "get_grades.php",
                     data: {
                         school_year,
                     },
-                    error: function(){
+                    error: function() {
                         $("#studentSubjects").html("<div class='alert alert-danger'>An error occurred while fetching data.</div>");
                     },
-                    success: function(response){
+                    success: function(response) {
                         $("#studentSubjects").html(response);
-                    }
+                    },
+                    beforeSend: function() {
+                        $("#studentSubjects").html(`
+                            <div class="text-center p-3">
+                                <div class="spinner-border" role="status"></div>
+                                <div>Loading...</div>
+                            </div>
+                        `);
+                        $(this).prop('disabled', true);
+                    },
+                }).then(function() {
+                    $(this).prop('disabled', false);
                 })
             })
             $("#searchButton").trigger("click");
