@@ -72,8 +72,12 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
                                         $teacher_subject_id = $sub['teacher_subject'];
                                         $enrollee_id = $sub['enrollee_id'];
                                         $criteria = myTools::getGradingCriteriaByTeacherSubjectID(compact('teacher_subject_id', 'conn'));
-                                        $finalRating = 0;
+                                        $finalRating = false;
                                         foreach ($periodList as $period => $periodVal) {
+                                            $isReleased = $conn->query("SELECT id FROM `released_grades` where teacher_subject_id = '$teacher_subject_id' and period = '$period'")->fetch_assoc();
+                                            if (!$isReleased) {
+                                                continue;
+                                            }
                                             $periodWeight = $periodVal['weight'];
                                             $periodPercentage = 0;
                                             foreach ($criteria as $criterion) {
@@ -85,13 +89,18 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
                                                 $periodPercentage += $scorePercentage;
                                             }
                                             $toCollegeGrade = myTools::convertToCollegeGrade($periodPercentage);
+                                            if ($finalRating === false) {
+                                                $finalRating = 0;
+                                            }
                                             $finalRating += $periodPercentage * ($periodWeight / 100);
                                         ?>
                                             <td><?= $toCollegeGrade ?></td>
                                         <?php }
                                         $finalRatingConvert = myTools::convertToCollegeGrade($finalRating);
-                                        $forGwa += $finalRatingConvert * $sub['units'];
-                                        $totalUnits += $sub['units'];
+                                        if ($finalRatingConvert !== "-") {
+                                            $forGwa += $finalRatingConvert * $sub['units'];
+                                            $totalUnits += $sub['units'];
+                                        }
                                         ?>
                                         <td><?= $finalRatingConvert ?></td>
                                         <td><?= $sub['units'] ?></td>

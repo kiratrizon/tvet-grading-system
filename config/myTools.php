@@ -148,6 +148,7 @@ class myTools
 
     public static function convertToCollegeGrade($percent)
     {
+        if ($percent === false) return "-";
         if ($percent >= 95) return 1.0;
         if ($percent >= 94) return 1.1;
         if ($percent >= 93) return 1.2;
@@ -176,6 +177,7 @@ class myTools
 
     public static function gradeRemark($grade)
     {
+        if ($grade === "-") return $grade;
         if ($grade <= 3.0) return "Passed";
         if ($grade <= 4.0 && $grade > 3.0) return "Conditional";
         return "Failed";

@@ -62,21 +62,17 @@ $studentSchoolyears = $conn->query("SELECT ts.school_year FROM teacher_subject_e
     <script src="../public/assets/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
-            // ajax to fetch school years
             $("#searchButton").click(function() {
+                var btn = $(this);
                 var school_year = $("#searchSchoolYear").val();
+
                 $.ajax({
                     method: "POST",
                     url: "get_grades.php",
                     data: {
-                        school_year,
+                        school_year
                     },
-                    error: function() {
-                        $("#studentSubjects").html("<div class='alert alert-danger'>An error occurred while fetching data.</div>");
-                    },
-                    success: function(response) {
-                        $("#studentSubjects").html(response);
-                    },
+
                     beforeSend: function() {
                         $("#studentSubjects").html(`
                             <div class="text-center p-3">
@@ -84,12 +80,24 @@ $studentSchoolyears = $conn->query("SELECT ts.school_year FROM teacher_subject_e
                                 <div>Loading...</div>
                             </div>
                         `);
-                        $(this).prop('disabled', true);
+                        btn.prop('disabled', true);
                     },
-                }).then(function() {
-                    $(this).prop('disabled', false);
-                })
-            })
+
+                    success: function(response) {
+                        $("#studentSubjects").html(response);
+                    },
+
+                    error: function() {
+                        $("#studentSubjects").html("<div class='alert alert-danger'>An error occurred while fetching data.</div>");
+                    },
+
+                    complete: function() {
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+
+            // Auto-trigger search on page load
             $("#searchButton").trigger("click");
         });
     </script>
